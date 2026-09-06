@@ -1,4 +1,3 @@
-```javascript
 /* =========================================================
    FileBox
    Supabase File Sharing
@@ -2835,4 +2834,3 @@ function toggleDarkMode() {
       : "🌙";
 
 }
-```
