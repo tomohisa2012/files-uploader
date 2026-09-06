@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>FileBox - ファイル共有</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+  <main class="container">
+
+    <!-- ヘッダー -->
+    <header class="header">
+      <div>
+        <h1>📦 FileBox</h1>
+        <p>ファイルをアップロードして、別の端末からダウンロード</p>
+      </div>
+
+      <button id="refreshBtn" class="refresh-btn">
+        ↻ 更新
+      </button>
+    </header>
+
+
+    <!-- アップロード -->
+    <section class="upload-card">
+
+      <h2>ファイルをアップロード</h2>
+
+      <label
+        for="fileInput"
+        id="dropArea"
+        class="drop-area"
+      >
+
+        <div class="upload-icon">
+          ⬆
+        </div>
+
+        <strong>
+          ファイルをここにドロップ
+        </strong>
+
+        <span>
+          またはクリックしてファイルを選択
+        </span>
+
+        <input
+          type="file"
+          id="fileInput"
+          hidden
+        >
+
+      </label>
+
+
+      <!-- 選択ファイル -->
+      <div
+        id="selectedFile"
+        class="selected-file hidden"
+      >
+
+        <div class="file-info">
+
+          <span class="file-icon">
+            📄
+          </span>
+
+          <div>
+            <strong id="selectedFileName">
+              -
+            </strong>
+
+            <span id="selectedFileSize">
+              -
+            </span>
+          </div>
+
+        </div>
+
+        <button
+          id="uploadBtn"
+          class="upload-btn"
+        >
+          アップロード
+        </button>
+
+      </div>
+
+
+      <!-- プログレス -->
+      <div
+        id="progressContainer"
+        class="progress-container hidden"
+      >
+
+        <div class="progress-info">
+          <span>アップロード中...</span>
+          <span id="progressText">0%</span>
+        </div>
+
+        <div class="progress-bar">
+          <div
+            id="progressBar"
+            class="progress"
+          ></div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- メッセージ -->
+    <div
+      id="message"
+      class="message hidden"
+    ></div>
+
+
+    <!-- ファイル一覧 -->
+    <section class="files-section">
+
+      <div class="section-header">
+
+        <div>
+          <h2>📁 ファイル一覧</h2>
+          <span id="fileCount">
+            0個のファイル
+          </span>
+        </div>
+
+        <input
+          type="search"
+          id="searchInput"
+          placeholder="ファイルを検索..."
+        >
+
+      </div>
+
+
+      <div
+        id="loading"
+        class="loading"
+      >
+        読み込み中...
+      </div>
+
+
+      <div
+        id="empty"
+        class="empty hidden"
+      >
+        <div>📭</div>
+        <strong>ファイルがありません</strong>
+        <span>最初のファイルをアップロードしてみよう！</span>
+      </div>
+
+
+      <div
+        id="fileList"
+        class="file-list"
+      ></div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ファイルカード用テンプレート -->
+  <template id="fileTemplate">
+
+    <article class="file-card">
+
+      <div class="file-card-icon">
+        📄
+      </div>
+
+      <div class="file-card-info">
+
+        <strong class="file-name">
+          -
+        </strong>
+
+        <div class="file-meta">
+          <span class="file-size">-</span>
+          <span>•</span>
+          <span class="file-date">-</span>
+        </div>
+
+      </div>
+
+      <div class="file-actions">
+
+        <a
+          class="download-btn"
+          target="_blank"
+          rel="noopener"
+        >
+          ダウンロード
+        </a>
+
+        <button class="copy-btn">
+          🔗 URL
+        </button>
+
+      </div>
+
+    </article>
+
+  </template>
+
+
+  <script src="script.js"></script>
+
+</body>
+</html>
