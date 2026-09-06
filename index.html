@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
 
@@ -10,219 +11,363 @@
 
   <title>FileBox - ファイル共有</title>
 
-  <link rel="stylesheet" href="style.css">
+  <meta
+    name="description"
+    content="パスワードで保護されたファイル共有サービス"
+  >
 
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <main class="container">
+<header class="site-header">
+  <div class="header-inner">
 
-    <!-- ヘッダー -->
-    <header class="header">
-      <div>
-        <h1>📦 FileBox</h1>
-        <p>ファイルをアップロードして、別の端末からダウンロード</p>
-      </div>
+    <div>
+      <h1>📦 FileBox</h1>
 
-      <button id="refreshBtn" class="refresh-btn">
-        ↻ 更新
-      </button>
-    </header>
+      <p>
+        パスワードで安全にファイルを共有
+      </p>
+    </div>
+
+    <button
+      id="refreshButton"
+      class="secondary-button"
+    >
+      ↻ 更新
+    </button>
+
+  </div>
+</header>
 
 
-    <!-- アップロード -->
-    <section class="upload-card">
+<main class="container">
 
-      <h2>ファイルをアップロード</h2>
+  <section class="info-box">
 
-      <label
-        for="fileInput"
-        id="dropArea"
-        class="drop-area"
+    <div class="info-icon">ℹ️</div>
+
+    <div>
+      <strong>FileBoxについて</strong>
+
+      <p>
+        ファイルをアップロードすると、
+        パスワード付きで共有できます。
+        ダウンロードするにはファイルごとのパスワードが必要です。
+      </p>
+    </div>
+
+  </section>
+
+
+  <section class="card upload-card">
+
+    <div class="section-title">
+      <h2>📤 ファイルをアップロード</h2>
+
+      <p>
+        ファイルを選択して、共有用パスワードを設定してください。
+      </p>
+    </div>
+
+
+    <label
+      id="dropZone"
+      class="drop-zone"
+    >
+
+      <input
+        id="fileInput"
+        type="file"
+        hidden
       >
 
-        <div class="upload-icon">
-          ⬆
-        </div>
+      <div class="drop-icon">
+        📁
+      </div>
 
-        <strong>
-          ファイルをここにドロップ
+      <strong>
+        ファイルをここにドロップ
+      </strong>
+
+      <span>
+        またはクリックしてファイルを選択
+      </span>
+
+    </label>
+
+
+    <div
+      id="selectedFile"
+      class="selected-file hidden"
+    >
+
+      <div class="selected-file-icon">
+        📄
+      </div>
+
+      <div class="selected-file-info">
+        <strong id="selectedFileName">
+          -
         </strong>
 
-        <span>
-          またはクリックしてファイルを選択
+        <span id="selectedFileSize">
+          -
         </span>
+      </div>
 
-        <input
-          type="file"
-          id="fileInput"
-          hidden
-        >
+      <button
+        id="removeSelectedFile"
+        class="icon-button"
+        type="button"
+      >
+        ×
+      </button>
 
+    </div>
+
+
+    <div
+      id="passwordArea"
+      class="password-area hidden"
+    >
+
+      <label for="uploadPassword">
+        🔐 ダウンロードパスワード
       </label>
 
-
-      <!-- 選択ファイル -->
-      <div
-        id="selectedFile"
-        class="selected-file hidden"
+      <input
+        id="uploadPassword"
+        type="password"
+        placeholder="パスワードを入力"
+        autocomplete="new-password"
       >
 
-        <div class="file-info">
+      <small>
+        ダウンロード時にこのパスワードが必要になります。
+      </small>
 
-          <span class="file-icon">
-            📄
-          </span>
+    </div>
 
-          <div>
-            <strong id="selectedFileName">
-              -
-            </strong>
 
-            <span id="selectedFileSize">
-              -
-            </span>
-          </div>
+    <button
+      id="uploadButton"
+      class="primary-button full-button"
+      disabled
+    >
+      📤 アップロード
+    </button>
 
-        </div>
 
-        <button
-          id="uploadBtn"
-          class="upload-btn"
-        >
-          アップロード
-        </button>
+    <div
+      id="progressArea"
+      class="progress-area hidden"
+    >
+
+      <div class="progress-header">
+
+        <span>
+          アップロード中...
+        </span>
+
+        <span id="progressText">
+          0%
+        </span>
 
       </div>
 
+      <div class="progress-track">
 
-      <!-- プログレス -->
-      <div
-        id="progressContainer"
-        class="progress-container hidden"
-      >
-
-        <div class="progress-info">
-          <span>アップロード中...</span>
-          <span id="progressText">0%</span>
-        </div>
-
-        <div class="progress-bar">
-          <div
-            id="progressBar"
-            class="progress"
-          ></div>
-        </div>
+        <div
+          id="progressBar"
+          class="progress-bar"
+        ></div>
 
       </div>
 
-    </section>
+    </div>
 
 
-    <!-- メッセージ -->
     <div
       id="message"
       class="message hidden"
     ></div>
 
+  </section>
 
-    <!-- ファイル一覧 -->
-    <section class="files-section">
 
-      <div class="section-header">
+  <section class="card">
 
-        <div>
-          <h2>📁 ファイル一覧</h2>
-          <span id="fileCount">
-            0個のファイル
-          </span>
-        </div>
+    <div class="files-header">
 
-        <input
-          type="search"
-          id="searchInput"
-          placeholder="ファイルを検索..."
-        >
+      <div>
+        <h2>📂 ファイル一覧</h2>
 
+        <p>
+          アップロードされたファイル
+        </p>
       </div>
 
+      <div class="file-count">
+        <span id="fileCount">0</span> 件
+      </div>
 
-      <div
-        id="loading"
-        class="loading"
+    </div>
+
+
+    <div class="search-area">
+
+      <input
+        id="searchInput"
+        type="search"
+        placeholder="🔎 ファイル名を検索..."
       >
-        読み込み中...
+
+    </div>
+
+
+    <div
+      id="loading"
+      class="state"
+    >
+      読み込み中...
+    </div>
+
+
+    <div
+      id="empty"
+      class="state hidden"
+    >
+      <div class="empty-icon">
+        📭
       </div>
 
+      <strong>
+        ファイルがありません
+      </strong>
 
-      <div
-        id="empty"
-        class="empty hidden"
-      >
-        <div>📭</div>
-        <strong>ファイルがありません</strong>
-        <span>最初のファイルをアップロードしてみよう！</span>
-      </div>
-
-
-      <div
-        id="fileList"
-        class="file-list"
-      ></div>
-
-    </section>
-
-  </main>
+      <span>
+        上からファイルをアップロードしてください。
+      </span>
+    </div>
 
 
-  <!-- ファイルカード用テンプレート -->
-  <template id="fileTemplate">
+    <div
+      id="fileList"
+      class="file-list"
+    ></div>
 
-    <article class="file-card">
+  </section>
 
-      <div class="file-card-icon">
+</main>
+
+
+<template id="fileTemplate">
+
+  <article class="file-card">
+
+    <div class="file-main">
+
+      <div class="file-icon">
         📄
       </div>
 
-      <div class="file-card-info">
+      <div class="file-info">
 
-        <strong class="file-name">
-          -
-        </strong>
+        <div class="file-name-row">
+
+          <strong class="file-name">
+            -
+          </strong>
+
+          <span class="lock-badge">
+            🔒 保護
+          </span>
+
+        </div>
 
         <div class="file-meta">
-          <span class="file-size">-</span>
+
+          <span class="file-size">
+            -
+          </span>
+
           <span>•</span>
-          <span class="file-date">-</span>
+
+          <span class="file-date">
+            -
+          </span>
+
         </div>
 
       </div>
 
-      <div class="file-actions">
+    </div>
 
-        <a
-          class="download-btn"
-          target="_blank"
-          rel="noopener"
+
+    <div class="file-access">
+
+      <div class="file-password-row">
+
+        <input
+          class="file-password"
+          type="password"
+          placeholder="パスワード"
+          autocomplete="off"
         >
-          ダウンロード
-        </a>
 
-        <button class="copy-btn">
-          🔗 URL
+        <button
+          class="auth-button"
+          type="button"
+        >
+          認証
         </button>
 
       </div>
 
-    </article>
 
-  </template>
+      <div class="auth-message"></div>
 
 
-  <script src="script.js"></script>
+      <div class="file-actions hidden">
+
+        <button
+          class="download-button"
+          type="button"
+        >
+          📥 ダウンロード
+        </button>
+
+        <button
+          class="copy-button"
+          type="button"
+        >
+          🔗 URLコピー
+        </button>
+
+        <button
+          class="delete-button"
+          type="button"
+        >
+          🗑️ 削除
+        </button>
+
+      </div>
+
+    </div>
+
+  </article>
+
+</template>
+
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="script.js"></script>
 
 </body>
 </html>
