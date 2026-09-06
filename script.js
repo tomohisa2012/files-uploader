@@ -1,1203 +1,988 @@
+"use strict";
+
+
 /* =========================================================
    FileBox
-   Main JavaScript
+   Supabase + GitHub Pages
 ========================================================= */
-
-"use strict";
 
 
 /* =========================================================
    Supabase設定
 =========================================================
 
-   ↓↓↓ ここだけ自分のSupabaseの値に変更 ↓↓↓
-*/
+   ↓↓↓ ここだけ自分のSupabaseの値にしてください ↓↓↓
+
+========================================================= */
 
 const SUPABASE_URL = "https://jlmskpyaftbndqhfqvwq.supabase.co"; 
 
 const SUPABASE_KEY = "sb_publishable_q3H9vNZW28PZVGHebbB72g_brELXdmZ";
 
-/* =========================================================
-   設定
-========================================================= */
-
-const STORAGE_BUCKET = "files";
-
-const EDGE_FUNCTION_NAME = "file-access";
-
-const FILES_PER_PAGE = 10;
-
-const SIGNED_URL_SECONDS = 300;
-
 
 /* =========================================================
-   アプリ
+   Supabase初期化
 ========================================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
+let supabaseClient = null;
 
-  let supabaseClient = null;
+function initSupabase() {
 
-  let allFiles = [];
-
-  let filteredFiles = [];
-
-  let currentPage = 1;
-
-  let selectedFile = null;
-
-  let currentPasswordFile = null;
-
-  let currentDeleteFile = null;
-
-  let currentSignedUrl = null;
-
-  let toastTimer = null;
-
-
-  /* =======================================================
-     DOM取得
-  ======================================================= */
-
-  const fileInput =
-    document.getElementById("fileInput");
-
-  const fileSelectButton =
-    document.getElementById("fileSelectButton");
-
-  const dropZone =
-    document.getElementById("dropZone");
-
-  const dropIcon =
-    document.getElementById("dropIcon");
-
-  const dropTitle =
-    document.getElementById("dropTitle");
-
-  const dropDescription =
-    document.getElementById("dropDescription");
-
-  const selectedFileBox =
-    document.getElementById("selectedFile");
-
-  const fileName =
-    document.getElementById("fileName");
-
-  const fileSize =
-    document.getElementById("fileSize");
-
-  const clearFileButton =
-    document.getElementById("clearFileButton");
-
-  const uploadPassword =
-    document.getElementById("uploadPassword");
-
-  const toggleUploadPassword =
-    document.getElementById("toggleUploadPassword");
-
-  const uploadButton =
-    document.getElementById("uploadButton");
-
-  const uploadResult =
-    document.getElementById("uploadResult");
-
-  const progressArea =
-    document.getElementById("progressArea");
-
-  const progressText =
-    document.getElementById("progressText");
-
-  const progressPercent =
-    document.getElementById("progressPercent");
-
-  const progressValue =
-    document.getElementById("progressValue");
-
-  const fileList =
-    document.getElementById("fileList");
-
-  const fileCount =
-    document.getElementById("fileCount");
-
-  const reloadButton =
-    document.getElementById("reloadButton");
-
-  const searchInput =
-    document.getElementById("searchInput");
-
-  const searchClear =
-    document.getElementById("searchClear");
-
-  const pagination =
-    document.getElementById("pagination");
-
-  const passwordModal =
-    document.getElementById("passwordModal");
-
-  const passwordModalFileName =
-    document.getElementById("passwordModalFileName");
-
-  const filePasswordInput =
-    document.getElementById("filePasswordInput");
-
-  const passwordError =
-    document.getElementById("passwordError");
-
-  const verifyPasswordButton =
-    document.getElementById("verifyPasswordButton");
-
-  const deleteModal =
-    document.getElementById("deleteModal");
-
-  const deleteModalFileName =
-    document.getElementById("deleteModalFileName");
-
-  const deleteKeyInput =
-    document.getElementById("deleteKeyInput");
-
-  const deleteError =
-    document.getElementById("deleteError");
-
-  const confirmDeleteButton =
-    document.getElementById("confirmDeleteButton");
-
-  const urlModal =
-    document.getElementById("urlModal");
-
-  const urlInput =
-    document.getElementById("urlInput");
-
-  const copyUrlButton =
-    document.getElementById("copyUrlButton");
-
-  const toast =
-    document.getElementById("toast");
-
-  const toastIcon =
-    document.getElementById("toastIcon");
-
-  const toastMessage =
-    document.getElementById("toastMessage");
-
-  const loadingOverlay =
-    document.getElementById("loadingOverlay");
-
-  const loadingText =
-    document.getElementById("loadingText");
-
-
-  /* =======================================================
-     Supabase初期化
-  ======================================================= */
-
-  function initializeSupabase() {
-
-    if (
-      typeof window.supabase === "undefined"
-    ) {
-      showFatalError(
-        "Supabaseライブラリを読み込めませんでした。"
-      );
-
-      return false;
-    }
-
-    if (
-      !SUPABASE_URL ||
-      SUPABASE_URL.includes("YOUR-PROJECT-ID")
-    ) {
-      showFatalError(
-        "script.js のSupabase URLを設定してください。"
-      );
-
-      return false;
-    }
-
-    if (
-      !SUPABASE_ANON_KEY ||
-      SUPABASE_ANON_KEY.includes("YOUR_SUPABASE")
-    ) {
-      showFatalError(
-        "script.js のSupabaseキーを設定してください。"
-      );
-
-      return false;
-    }
-
-    try {
-
-      supabaseClient =
-        window.supabase.createClient(
-          SUPABASE_URL,
-          SUPABASE_ANON_KEY
-        );
-
-      return true;
-
-    } catch (error) {
-
-      console.error(
-        "Supabase initialization error:",
-        error
-      );
-
-      showFatalError(
-        "Supabaseの初期化に失敗しました。"
-      );
-
-      return false;
-    }
-  }
-
-
-  /* =======================================================
-     Fatal Error
-  ======================================================= */
-
-  function showFatalError(message) {
-
-    hideLoading();
-
-    if (fileList) {
-
-      fileList.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">!</div>
-          <h3>エラーが発生しました</h3>
-          <p>${escapeHtml(message)}</p>
-        </div>
-      `;
-    }
-  }
-
-
-  /* =======================================================
-     Utility
-  ======================================================= */
-
-  function escapeHtml(value) {
-
-    if (value === null || value === undefined) {
-      return "";
-    }
-
-    return String(value)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-
-  function formatFileSize(bytes) {
-
-    const value = Number(bytes);
-
-    if (!Number.isFinite(value)) {
-      return "0 B";
-    }
-
-    if (value < 1024) {
-      return `${value} B`;
-    }
-
-    if (value < 1024 * 1024) {
-      return `${(value / 1024).toFixed(1)} KB`;
-    }
-
-    if (value < 1024 * 1024 * 1024) {
-      return `${(
-        value /
-        (1024 * 1024)
-      ).toFixed(1)} MB`;
-    }
-
-    return `${(
-      value /
-      (1024 * 1024 * 1024)
-    ).toFixed(2)} GB`;
-  }
-
-
-  function formatDate(dateString) {
-
-    if (!dateString) {
-      return "";
-    }
-
-    const date =
-      new Date(dateString);
-
-    if (Number.isNaN(date.getTime())) {
-      return "";
-    }
-
-    return date.toLocaleString(
-      "ja-JP",
-      {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit"
-      }
-    );
-  }
-
-
-  function getFileIcon(file) {
-
-    const mime =
-      String(file.mime_type || "")
-        .toLowerCase();
-
-    const name =
-      String(file.name || "")
-        .toLowerCase();
-
-    if (mime.startsWith("image/")) {
-      return "🖼️";
-    }
-
-    if (mime.startsWith("video/")) {
-      return "🎬";
-    }
-
-    if (mime.startsWith("audio/")) {
-      return "🎵";
-    }
-
-    if (
-      mime.includes("pdf") ||
-      name.endsWith(".pdf")
-    ) {
-      return "📕";
-    }
-
-    if (
-      mime.includes("zip") ||
-      mime.includes("compressed") ||
-      name.endsWith(".zip")
-    ) {
-      return "📦";
-    }
-
-    if (
-      mime.includes("text") ||
-      name.endsWith(".txt")
-    ) {
-      return "📄";
-    }
-
-    return "📁";
-  }
-
-
-  /* =======================================================
-     Loading
-  ======================================================= */
-
-  function showLoading(text = "読み込み中...") {
-
-    if (!loadingOverlay) {
-      return;
-    }
-
-    if (loadingText) {
-      loadingText.textContent = text;
-    }
-
-    loadingOverlay.classList.remove(
-      "hidden"
-    );
-  }
-
-
-  function hideLoading() {
-
-    if (!loadingOverlay) {
-      return;
-    }
-
-    loadingOverlay.classList.add(
-      "hidden"
-    );
-  }
-
-
-  /* =======================================================
-     Toast
-  ======================================================= */
-
-  function showToast(
-    message,
-    type = "success"
+  if (
+    typeof window.supabase === "undefined" ||
+    typeof window.supabase.createClient !== "function"
   ) {
+    console.error(
+      "Supabase CDNが読み込まれていません。"
+    );
 
-    if (!toast) {
-      return;
+    return false;
+  }
+
+  if (
+    !SUPABASE_URL ||
+    SUPABASE_URL.includes("ここに")
+  ) {
+    console.error(
+      "Supabase URLが設定されていません。"
+    );
+
+    return false;
+  }
+
+  if (
+    !SUPABASE_PUBLISHABLE_KEY ||
+    SUPABASE_PUBLISHABLE_KEY.includes("ここに")
+  ) {
+    console.error(
+      "Supabase Publishable keyが設定されていません。"
+    );
+
+    return false;
+  }
+
+  try {
+
+    supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+      );
+
+    console.log(
+      "Supabase initialized."
+    );
+
+    return true;
+
+  } catch (error) {
+
+    console.error(
+      "Supabase initialization error:",
+      error
+    );
+
+    return false;
+  }
+}
+
+
+/* =========================================================
+   DOM
+========================================================= */
+
+let fileInput;
+let dropZone;
+let dropIcon;
+let dropTitle;
+let dropDescription;
+
+let selectedFile;
+let fileName;
+let fileSize;
+let clearFileButton;
+
+let uploadPassword;
+let togglePassword;
+let uploadButton;
+
+let progressArea;
+let progressText;
+let progressPercent;
+let progressValue;
+
+let deleteKeyBox;
+let deleteKeyText;
+let copyDeleteKeyButton;
+
+let reloadButton;
+let searchInput;
+let searchClear;
+let fileCount;
+let fileList;
+let pagination;
+
+let passwordModal;
+let passwordModalFileName;
+let accessPassword;
+let passwordError;
+let passwordSubmit;
+
+let deleteModal;
+let deleteModalFileName;
+let deleteKeyInput;
+let deleteError;
+let deleteSubmit;
+
+let urlModal;
+let urlText;
+let copyUrlButton;
+
+let loadingModal;
+let loadingText;
+
+
+/* =========================================================
+   State
+========================================================= */
+
+let currentFile = null;
+
+let currentAction = null;
+
+let currentDeleteFile = null;
+
+let currentPage = 1;
+
+const PAGE_SIZE = 10;
+
+let allFiles = [];
+
+let filteredFiles = [];
+
+
+/* =========================================================
+   Utility
+========================================================= */
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+
+function escapeHTML(value) {
+
+  const div = document.createElement("div");
+
+  div.textContent =
+    value == null ? "" : String(value);
+
+  return div.innerHTML;
+}
+
+
+function formatFileSize(bytes) {
+
+  if (!Number.isFinite(Number(bytes))) {
+    return "0 B";
+  }
+
+  bytes = Number(bytes);
+
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+
+  if (bytes < 1024 * 1024 * 1024) {
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  return `${(
+    bytes /
+    (1024 * 1024 * 1024)
+  ).toFixed(2)} GB`;
+}
+
+
+function formatDate(dateString) {
+
+  if (!dateString) {
+    return "";
+  }
+
+  const date =
+    new Date(dateString);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return "";
+  }
+
+  return date.toLocaleString(
+    "ja-JP",
+    {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit"
     }
+  );
+}
 
-    clearTimeout(toastTimer);
 
-    toastMessage.textContent =
-      message;
+function getFileIcon(file) {
 
-    toastIcon.textContent =
-      type === "error"
-        ? "!"
-        : "✓";
+  const mime =
+    file?.mime_type || "";
 
-    toast.classList.remove(
-      "hidden"
-    );
+  const name =
+    file?.name || "";
 
-    toastTimer =
-      setTimeout(() => {
-
-        toast.classList.add(
-          "hidden"
-        );
-
-      }, 2800);
+  if (
+    mime.startsWith("image/")
+  ) {
+    return "🖼️";
   }
 
-
-  /* =======================================================
-     ファイル選択
-  ======================================================= */
-
-  function handleSelectedFile(file) {
-
-    if (!file) {
-      clearSelectedFile();
-      return;
-    }
-
-    selectedFile = file;
-
-    fileName.textContent =
-      file.name;
-
-    fileSize.textContent =
-      formatFileSize(file.size);
-
-    selectedFileBox.classList.remove(
-      "hidden"
-    );
-
-    dropZone.classList.add(
-      "has-file"
-    );
-
-    dropIcon.textContent = "✓";
-
-    dropTitle.textContent =
-      "ファイルが選択されています";
-
-    dropDescription.textContent =
-      "別のファイルに変更する場合は「ファイルを選ぶ」を押してください";
-
-    uploadButton.disabled = false;
-
-    hideUploadResult();
+  if (
+    mime.startsWith("video/")
+  ) {
+    return "🎬";
   }
 
-
-  function clearSelectedFile() {
-
-    selectedFile = null;
-
-    if (fileInput) {
-      fileInput.value = "";
-    }
-
-    selectedFileBox.classList.add(
-      "hidden"
-    );
-
-    dropZone.classList.remove(
-      "has-file"
-    );
-
-    dropIcon.textContent = "↑";
-
-    dropTitle.textContent =
-      "ファイルを選択";
-
-    dropDescription.textContent =
-      "下のボタンからファイルを選択してください";
-
-    uploadButton.disabled = true;
+  if (
+    mime.startsWith("audio/")
+  ) {
+    return "🎵";
   }
 
-
-  /*
-   * ここがファイル選択のメイン。
-   *
-   * labelを使わず、
-   * ボタン → input.click()
-   *
-   * にしているので、
-   * 「押してもファイル選択画面が出ない」
-   * という問題を避けやすくしています。
-   */
-
-  if (fileSelectButton) {
-
-    fileSelectButton.addEventListener(
-      "click",
-      (event) => {
-
-        event.preventDefault();
-
-        if (fileInput) {
-          fileInput.click();
-        }
-
-      }
-    );
+  if (
+    mime.includes("pdf") ||
+    name.toLowerCase().endsWith(".pdf")
+  ) {
+    return "📕";
   }
 
+  if (
+    mime.includes("zip") ||
+    mime.includes("compressed") ||
+    name.toLowerCase().endsWith(".zip")
+  ) {
+    return "📦";
+  }
+
+  if (
+    mime.includes("text") ||
+    name.toLowerCase().endsWith(".txt")
+  ) {
+    return "📄";
+  }
+
+  return "📁";
+}
+
+
+/* =========================================================
+   Loading
+========================================================= */
+
+function showLoading(text = "読み込み中...") {
+
+  if (!loadingModal) {
+    return;
+  }
+
+  loadingText.textContent =
+    text;
+
+  loadingModal.classList.remove(
+    "hidden"
+  );
+}
+
+
+function hideLoading() {
+
+  if (!loadingModal) {
+    return;
+  }
+
+  loadingModal.classList.add(
+    "hidden"
+  );
+}
+
+
+/* =========================================================
+   Modal
+========================================================= */
+
+function openModal(id) {
+
+  const modal =
+    $(id);
+
+  if (!modal) {
+    return;
+  }
+
+  modal.classList.remove(
+    "hidden"
+  );
+}
+
+
+function closeModal(id) {
+
+  const modal =
+    $(id);
+
+  if (!modal) {
+    return;
+  }
+
+  modal.classList.add(
+    "hidden"
+  );
+}
+
+
+function closeAllModals() {
+
+  [
+    "passwordModal",
+    "deleteModal",
+    "urlModal"
+  ].forEach(closeModal);
+}
+
+
+/* =========================================================
+   File Selection
+========================================================= */
+
+function showSelectedFile(file) {
+
+  if (!file) {
+    clearSelectedFile();
+
+    return;
+  }
+
+  fileName.textContent =
+    file.name;
+
+  fileSize.textContent =
+    formatFileSize(file.size);
+
+  selectedFile.classList.remove(
+    "hidden"
+  );
+
+  dropZone.classList.add(
+    "has-file"
+  );
+
+  dropIcon.textContent =
+    "✓";
+
+  dropTitle.textContent =
+    "ファイルが選択されています";
+
+  dropDescription.textContent =
+    "別のファイルに変更する場合は「ファイルを選ぶ」を押してください";
+
+  uploadButton.disabled =
+    false;
+}
+
+
+function clearSelectedFile() {
 
   if (fileInput) {
-
-    fileInput.addEventListener(
-      "change",
-      () => {
-
-        const file =
-          fileInput.files &&
-          fileInput.files[0];
-
-        if (!file) {
-          return;
-        }
-
-        handleSelectedFile(file);
-
-      }
-    );
+    fileInput.value = "";
   }
 
+  selectedFile.classList.add(
+    "hidden"
+  );
 
-  if (clearFileButton) {
+  dropZone.classList.remove(
+    "has-file"
+  );
 
-    clearFileButton.addEventListener(
-      "click",
-      (event) => {
+  dropIcon.textContent =
+    "↑";
 
-        event.preventDefault();
-        event.stopPropagation();
+  dropTitle.textContent =
+    "ファイルを選択";
 
-        clearSelectedFile();
+  dropDescription.textContent =
+    "ファイルを選ぶには下のボタンを押してください";
 
+  uploadButton.disabled =
+    true;
+}
+
+
+/* =========================================================
+   Drag & Drop
+========================================================= */
+
+function setupFileSelection() {
+
+  fileInput.addEventListener(
+    "change",
+    function () {
+
+      const file =
+        this.files &&
+        this.files[0];
+
+      if (!file) {
+        return;
       }
-    );
-  }
+
+      showSelectedFile(file);
+    }
+  );
 
 
-  /* =======================================================
-     ドラッグ＆ドロップ
-  ======================================================= */
+  clearFileButton.addEventListener(
+    "click",
+    function (event) {
 
-  if (dropZone) {
+      event.preventDefault();
 
-    dropZone.addEventListener(
-      "dragover",
-      (event) => {
+      event.stopPropagation();
 
-        event.preventDefault();
-
-        dropZone.classList.add(
-          "dragover"
-        );
-
-      }
-    );
+      clearSelectedFile();
+    }
+  );
 
 
-    dropZone.addEventListener(
-      "dragleave",
-      (event) => {
+  dropZone.addEventListener(
+    "dragover",
+    function (event) {
 
-        if (
-          !dropZone.contains(
-            event.relatedTarget
-          )
-        ) {
+      event.preventDefault();
 
-          dropZone.classList.remove(
-            "dragover"
-          );
-        }
-
-      }
-    );
+      dropZone.classList.add(
+        "dragover"
+      );
+    }
+  );
 
 
-    dropZone.addEventListener(
-      "drop",
-      (event) => {
+  dropZone.addEventListener(
+    "dragleave",
+    function (event) {
 
-        event.preventDefault();
+      if (
+        !dropZone.contains(
+          event.relatedTarget
+        )
+      ) {
 
         dropZone.classList.remove(
           "dragover"
         );
-
-        const files =
-          event.dataTransfer &&
-          event.dataTransfer.files;
-
-        if (
-          !files ||
-          files.length === 0
-        ) {
-          return;
-        }
-
-        const file = files[0];
-
-        try {
-
-          const dataTransfer =
-            new DataTransfer();
-
-          dataTransfer.items.add(file);
-
-          fileInput.files =
-            dataTransfer.files;
-
-        } catch (error) {
-
-          console.warn(
-            "input.filesへの設定に失敗:",
-            error
-          );
-        }
-
-        handleSelectedFile(file);
-
       }
-    );
-  }
-
-
-  /* =======================================================
-     パスワード表示切替
-  ======================================================= */
-
-  if (toggleUploadPassword) {
-
-    toggleUploadPassword.addEventListener(
-      "click",
-      () => {
-
-        if (
-          uploadPassword.type ===
-          "password"
-        ) {
-
-          uploadPassword.type =
-            "text";
-
-          toggleUploadPassword.textContent =
-            "非表示";
-
-        } else {
-
-          uploadPassword.type =
-            "password";
-
-          toggleUploadPassword.textContent =
-            "表示";
-        }
-
-      }
-    );
-  }
-
-
-  /* =======================================================
-     ランダム文字列
-  ======================================================= */
-
-  function randomString(length = 32) {
-
-    const chars =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-      "abcdefghijklmnopqrstuvwxyz" +
-      "0123456789";
-
-    let result = "";
-
-    const array =
-      new Uint32Array(length);
-
-    crypto.getRandomValues(array);
-
-    for (let i = 0; i < length; i++) {
-
-      result +=
-        chars[
-          array[i] % chars.length
-        ];
     }
-
-    return result;
-  }
+  );
 
 
-  /* =======================================================
-     Base64
-  ======================================================= */
+  dropZone.addEventListener(
+    "drop",
+    function (event) {
 
-  function bytesToBase64(bytes) {
+      event.preventDefault();
 
-    let binary = "";
+      dropZone.classList.remove(
+        "dragover"
+      );
 
-    const chunkSize = 0x8000;
+      const files =
+        event.dataTransfer.files;
 
-    for (
-      let i = 0;
-      i < bytes.length;
-      i += chunkSize
-    ) {
+      if (
+        !files ||
+        files.length === 0
+      ) {
+        return;
+      }
 
-      const chunk =
-        bytes.subarray(
-          i,
-          Math.min(
-            i + chunkSize,
-            bytes.length
-          )
+      const file =
+        files[0];
+
+      try {
+
+        const dataTransfer =
+          new DataTransfer();
+
+        dataTransfer.items.add(
+          file
         );
 
-      binary += String.fromCharCode(
-        ...chunk
-      );
+        fileInput.files =
+          dataTransfer.files;
+
+      } catch (error) {
+
+        console.warn(
+          "DataTransfer failed:",
+          error
+        );
+      }
+
+      showSelectedFile(file);
     }
+  );
+}
 
-    return btoa(binary);
-  }
+
+/* =========================================================
+   Password Toggle
+========================================================= */
+
+function setupPasswordToggle() {
+
+  togglePassword.addEventListener(
+    "click",
+    function () {
+
+      if (
+        uploadPassword.type ===
+        "password"
+      ) {
+
+        uploadPassword.type =
+          "text";
+
+        togglePassword.textContent =
+          "非表示";
+
+      } else {
+
+        uploadPassword.type =
+          "password";
+
+        togglePassword.textContent =
+          "表示";
+      }
+    }
+  );
+}
 
 
-  /* =======================================================
-     Password Hash
-  ======================================================= */
+/* =========================================================
+   Random String
+========================================================= */
 
-  async function hashPassword(
-    password,
-    saltBase64
+function randomString(length = 32) {
+
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  const array =
+    new Uint32Array(length);
+
+  crypto.getRandomValues(
+    array
+  );
+
+  let result = "";
+
+  for (
+    let i = 0;
+    i < array.length;
+    i++
   ) {
 
-    const binary =
-      atob(saltBase64);
+    result +=
+      chars[
+        array[i] %
+        chars.length
+      ];
+  }
 
-    const salt =
-      new Uint8Array(
-        binary.length
-      );
-
-    for (
-      let i = 0;
-      i < binary.length;
-      i++
-    ) {
-
-      salt[i] =
-        binary.charCodeAt(i);
-    }
+  return result;
+}
 
 
-    const encoder =
-      new TextEncoder();
+/* =========================================================
+   Base64
+========================================================= */
 
+function bytesToBase64(bytes) {
 
-    const keyMaterial =
-      await crypto.subtle.importKey(
-        "raw",
-        encoder.encode(password),
-        "PBKDF2",
-        false,
-        ["deriveBits"]
-      );
+  let binary = "";
 
+  for (
+    let i = 0;
+    i < bytes.length;
+    i++
+  ) {
 
-    const derivedBits =
-      await crypto.subtle.deriveBits(
-        {
-          name: "PBKDF2",
-
-          salt,
-
-          iterations: 120000,
-
-          hash: "SHA-256"
-        },
-
-        keyMaterial,
-
-        256
-      );
-
-
-    return bytesToBase64(
-      new Uint8Array(
-        derivedBits
-      )
+    binary += String.fromCharCode(
+      bytes[i]
     );
   }
 
-
-  /* =======================================================
-     Upload
-  ======================================================= */
-
-  async function uploadFile() {
-
-    if (!selectedFile) {
-
-      showToast(
-        "先にファイルを選択してください。",
-        "error"
-      );
-
-      return;
-    }
+  return btoa(binary);
+}
 
 
-    const password =
-      uploadPassword.value;
+/* =========================================================
+   Password Hash
+========================================================= */
 
+async function hashPassword(
+  password,
+  saltBase64
+) {
 
-    if (!password) {
+  const binary =
+    atob(saltBase64);
 
-      showToast(
-        "パスワードを入力してください。",
-        "error"
-      );
-
-      uploadPassword.focus();
-
-      return;
-    }
-
-
-    if (password.length < 1) {
-
-      showToast(
-        "パスワードを入力してください。",
-        "error"
-      );
-
-      return;
-    }
-
-
-    if (!supabaseClient) {
-
-      showToast(
-        "Supabaseが初期化されていません。",
-        "error"
-      );
-
-      return;
-    }
-
-
-    uploadButton.disabled = true;
-
-    clearUploadResult();
-
-    progressArea.classList.remove(
-      "hidden"
+  const salt =
+    new Uint8Array(
+      binary.length
     );
+
+  for (
+    let i = 0;
+    i < binary.length;
+    i++
+  ) {
+
+    salt[i] =
+      binary.charCodeAt(i);
+  }
+
+
+  const encoder =
+    new TextEncoder();
+
+
+  const keyMaterial =
+    await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(password),
+      "PBKDF2",
+      false,
+      ["deriveBits"]
+    );
+
+
+  const derivedBits =
+    await crypto.subtle.deriveBits(
+      {
+        name: "PBKDF2",
+        salt: salt,
+        iterations: 120000,
+        hash: "SHA-256"
+      },
+      keyMaterial,
+      256
+    );
+
+
+  return bytesToBase64(
+    new Uint8Array(
+      derivedBits
+    )
+  );
+}
+
+
+async function createPasswordData(
+  password
+) {
+
+  const salt =
+    new Uint8Array(16);
+
+  crypto.getRandomValues(
+    salt
+  );
+
+  const saltBase64 =
+    bytesToBase64(salt);
+
+  const hash =
+    await hashPassword(
+      password,
+      saltBase64
+    );
+
+  return {
+    salt: saltBase64,
+    hash: hash
+  };
+}
+
+
+/* =========================================================
+   Upload
+========================================================= */
+
+async function uploadFile() {
+
+  if (!supabaseClient) {
+
+    alert(
+      "Supabaseが初期化されていません。\n\nscript.jsのSupabase URLとPublishable keyを確認してください。"
+    );
+
+    return;
+  }
+
+
+  const file =
+    fileInput.files &&
+    fileInput.files[0];
+
+
+  if (!file) {
+
+    alert(
+      "ファイルを選択してください。"
+    );
+
+    return;
+  }
+
+
+  const password =
+    uploadPassword.value.trim();
+
+
+  if (!password) {
+
+    alert(
+      "ダウンロードパスワードを入力してください。"
+    );
+
+    uploadPassword.focus();
+
+    return;
+  }
+
+
+  uploadButton.disabled =
+    true;
+
+  progressArea.classList.remove(
+    "hidden"
+  );
+
+  setProgress(
+    5,
+    "準備中..."
+  );
+
+
+  try {
+
+    /* -----------------------------------------
+       パスワード作成
+    ----------------------------------------- */
 
     setProgress(
-      5,
-      "アップロードの準備中..."
+      10,
+      "パスワードを準備しています..."
     );
 
-
-    try {
-
-      /*
-       * パスワード用ソルト
-       */
-
-      const passwordSaltBytes =
-        new Uint8Array(16);
-
-      crypto.getRandomValues(
-        passwordSaltBytes
-      );
-
-      const passwordSalt =
-        bytesToBase64(
-          passwordSaltBytes
-        );
-
-
-      /*
-       * パスワードハッシュ
-       */
-
-      setProgress(
-        10,
-        "パスワードを保護しています..."
-      );
-
-      const passwordHash =
-        await hashPassword(
-          password,
-          passwordSalt
-        );
-
-
-      /*
-       * 削除キー
-       */
-
-      const deleteKey =
-        randomString(32);
-
-      const deleteSaltBytes =
-        new Uint8Array(16);
-
-      crypto.getRandomValues(
-        deleteSaltBytes
-      );
-
-      const deleteSalt =
-        bytesToBase64(
-          deleteSaltBytes
-        );
-
-      const deleteHash =
-        await hashPassword(
-          deleteKey,
-          deleteSalt
-        );
-
-
-      /*
-       * Storageパス
-       */
-
-      const safeName =
-        selectedFile.name
-          .replace(/[^\w.\-()\[\] ]/g, "_");
-
-      const uniqueName =
-        `${Date.now()}_${randomString(10)}_${safeName}`;
-
-      const storagePath =
-        uniqueName;
-
-
-      /*
-       * Storageへアップロード
-       */
-
-      setProgress(
-        15,
-        "ファイルをアップロードしています..."
+    const passwordData =
+      await createPasswordData(
+        password
       );
 
 
-      const {
-        error: storageError
-      } =
-        await supabaseClient
-          .storage
-          .from(STORAGE_BUCKET)
-          .upload(
-            storagePath,
-            selectedFile,
-            {
-              cacheControl: "3600",
-              upsert: false,
+    /* -----------------------------------------
+       削除キー
+    ----------------------------------------- */
 
-              contentType:
-                selectedFile.type ||
-                "application/octet-stream"
-            }
-          );
+    const deleteKey =
+      randomString(32);
 
-
-      if (storageError) {
-
-        console.error(
-          storageError
-        );
-
-        throw new Error(
-          storageError.message ||
-          "Storageへのアップロードに失敗しました。"
-        );
-      }
-
-
-      setProgress(
-        75,
-        "ファイル情報を保存しています..."
-      );
-
-
-      /*
-       * DBへ保存
-       *
-       * public_urlは
-       * private bucketでもNULL不可なので
-       * 空文字を入れます。
-       */
-
-      const insertData = {
-
-        name:
-          selectedFile.name,
-
-        storage_path:
-          storagePath,
-
-        size:
-          selectedFile.size,
-
-        mime_type:
-          selectedFile.type ||
-          "application/octet-stream",
-
-        public_url:
-          "",
-
-        password_salt:
-          passwordSalt,
-
-        password_hash:
-          passwordHash,
-
-        has_password:
-          true,
-
-        delete_salt:
-          deleteSalt,
-
-        delete_hash:
-          deleteHash
-      };
-
-
-      const {
-        data: insertedFile,
-        error: dbError
-      } =
-        await supabaseClient
-          .from("files")
-          .insert(
-            insertData
-          )
-          .select()
-          .single();
-
-
-      if (dbError) {
-
-        console.error(
-          dbError
-        );
-
-
-        /*
-         * DB登録に失敗したら
-         * Storageのファイルを
-         * 可能な限り削除します。
-         */
-
-        try {
-
-          await supabaseClient
-            .storage
-            .from(STORAGE_BUCKET)
-            .remove([
-              storagePath
-            ]);
-
-        } catch (
-          cleanupError
-        ) {
-
-          console.warn(
-            cleanupError
-          );
-        }
-
-
-        throw new Error(
-          dbError.message ||
-          "ファイル情報の保存に失敗しました。"
-        );
-      }
-
-
-      setProgress(
-        100,
-        "アップロード完了！"
-      );
-
-
-      /*
-       * 削除キーを一度だけ表示
-       */
-
-      showUploadSuccess(
-        insertedFile,
+    const deleteData =
+      await createPasswordData(
         deleteKey
       );
 
 
-      showToast(
-        "ファイルをアップロードしました！"
-      );
+    /* -----------------------------------------
+       Storage path
+    ----------------------------------------- */
+
+    const extension =
+      getExtension(file.name);
+
+    const storagePath =
+      `${Date.now()}_${randomString(16)}${extension}`;
 
 
-      /*
-       * 入力をリセット
-       */
+    /* -----------------------------------------
+       Storage upload
+    ----------------------------------------- */
 
-      clearSelectedFile();
-
-      uploadPassword.value = "";
-
-      await loadFiles();
-
-
-    } catch (error) {
-
-      console.error(
-        "Upload error:",
-        error
-      );
+    setProgress(
+      20,
+      "ファイルをアップロードしています..."
+    );
 
 
-      showUploadResult(
-        "error",
-        error.message ||
-        "アップロードに失敗しました。"
-      );
+    const {
+      error: uploadError
+    } =
+      await supabaseClient
+        .storage
+        .from("files")
+        .upload(
+          storagePath,
+          file,
+          {
+            cacheControl: "3600",
+            upsert: false,
+            contentType:
+              file.type ||
+              "application/octet-stream"
+          }
+        );
 
 
-      showToast(
-        error.message ||
-        "アップロードに失敗しました。",
-        "error"
-      );
+    if (uploadError) {
+      throw uploadError;
+    }
 
-    } finally {
 
-      setTimeout(() => {
+    setProgress(
+      70,
+      "ファイル情報を保存しています..."
+    );
+
+
+    /* -----------------------------------------
+       DB
+    ----------------------------------------- */
+
+    const row = {
+
+      name: file.name,
+
+      storage_path:
+        storagePath,
+
+      size:
+        file.size,
+
+      mime_type:
+        file.type ||
+        "application/octet-stream",
+
+      public_url:
+        "",
+
+      password_salt:
+        passwordData.salt,
+
+      password_hash:
+        passwordData.hash,
+
+      has_password:
+        true,
+
+      delete_salt:
+        deleteData.salt,
+
+      delete_hash:
+        deleteData.hash
+    };
+
+
+    const {
+      error: dbError
+    } =
+      await supabaseClient
+        .from("files")
+        .insert(row);
+
+
+    if (dbError) {
+
+      /* DB保存失敗時はStorageも削除 */
+
+      await supabaseClient
+        .storage
+        .from("files")
+        .remove([
+          storagePath
+        ]);
+
+      throw dbError;
+    }
+
+
+    setProgress(
+      100,
+      "アップロード完了！"
+    );
+
+
+    /* -----------------------------------------
+       Delete key display
+    ----------------------------------------- */
+
+    deleteKeyText.textContent =
+      deleteKey;
+
+    deleteKeyBox.classList.remove(
+      "hidden"
+    );
+
+
+    alert(
+      "アップロードが完了しました！\n\n削除キーは必ず保存してください。"
+    );
+
+
+    clearSelectedFile();
+
+    uploadPassword.value =
+      "";
+
+    await loadFiles();
+
+
+  } catch (error) {
+
+    console.error(
+      "Upload error:",
+      error
+    );
+
+    alert(
+      "アップロードに失敗しました。\n\n" +
+      getErrorMessage(error)
+    );
+
+  } finally {
+
+    uploadButton.disabled =
+      !fileInput.files?.length;
+
+    setTimeout(
+      () => {
 
         progressArea.classList.add(
           "hidden"
@@ -1208,1475 +993,723 @@ document.addEventListener("DOMContentLoaded", () => {
           "アップロード中..."
         );
 
-        uploadButton.disabled =
-          !selectedFile;
+      },
+      1200
+    );
+  }
+}
 
-      }, 1000);
-    }
+
+function setProgress(
+  percent,
+  text
+) {
+
+  progressValue.style.width =
+    `${percent}%`;
+
+  progressPercent.textContent =
+    `${percent}%`;
+
+  progressText.textContent =
+    text;
+}
+
+
+function getExtension(name) {
+
+  const index =
+    name.lastIndexOf(".");
+
+  if (
+    index === -1
+  ) {
+    return "";
+  }
+
+  return name.substring(
+    index
+  );
+}
+
+
+/* =========================================================
+   Load Files
+========================================================= */
+
+async function loadFiles() {
+
+  if (!supabaseClient) {
+    return;
   }
 
 
-  /* =======================================================
-     Progress
-  ======================================================= */
+  try {
 
-  function setProgress(
-    percent,
-    text
-  ) {
-
-    const safePercent =
-      Math.max(
-        0,
-        Math.min(
-          100,
-          percent
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("files")
+        .select(
+          "id,name,storage_path,size,mime_type,public_url,created_at,has_password"
         )
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        );
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    allFiles =
+      Array.isArray(data)
+        ? data
+        : [];
+
+
+    applySearch();
+
+
+  } catch (error) {
+
+    console.error(
+      "Load files error:",
+      error
+    );
+
+    fileList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <strong>ファイル一覧を読み込めませんでした</strong>
+        <p>${escapeHTML(
+          getErrorMessage(error)
+        )}</p>
+      </div>
+    `;
+  }
+}
+
+
+/* =========================================================
+   Search
+========================================================= */
+
+function applySearch() {
+
+  const keyword =
+    searchInput.value
+      .trim()
+      .toLowerCase();
+
+
+  if (!keyword) {
+
+    filteredFiles =
+      [...allFiles];
+
+  } else {
+
+    filteredFiles =
+      allFiles.filter(
+        file =>
+          String(
+            file.name || ""
+          )
+            .toLowerCase()
+            .includes(keyword)
       );
-
-    progressValue.style.width =
-      `${safePercent}%`;
-
-    progressPercent.textContent =
-      `${Math.round(safePercent)}%`;
-
-    progressText.textContent =
-      text;
   }
 
 
-  /* =======================================================
-     Upload Result
-  ======================================================= */
+  currentPage =
+    1;
 
-  function clearUploadResult() {
-
-    uploadResult.className =
-      "upload-result hidden";
-
-    uploadResult.innerHTML = "";
-  }
+  renderFiles();
+}
 
 
-  function hideUploadResult() {
+function renderFiles() {
 
-    clearUploadResult();
-  }
+  fileCount.textContent =
+    `${filteredFiles.length}件`;
 
 
-  function showUploadResult(
-    type,
-    html
+  if (
+    filteredFiles.length === 0
   ) {
 
-    uploadResult.className =
-      `upload-result ${type}`;
+    fileList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <strong>ファイルがありません</strong>
+        <p>アップロードされたファイルがここに表示されます。</p>
+      </div>
+    `;
 
-    uploadResult.innerHTML =
-      html;
+    pagination.innerHTML =
+      "";
+
+    return;
   }
 
 
-  function showUploadSuccess(
-    insertedFile,
-    deleteKey
+  const totalPages =
+    Math.ceil(
+      filteredFiles.length /
+      PAGE_SIZE
+    );
+
+
+  if (
+    currentPage >
+    totalPages
   ) {
 
-    const safeKey =
-      escapeHtml(deleteKey);
-
-    const safeName =
-      escapeHtml(
-        insertedFile?.name ||
-        selectedFile?.name ||
-        "ファイル"
-      );
+    currentPage =
+      totalPages;
+  }
 
 
-    showUploadResult(
-      "success",
+  const start =
+    (currentPage - 1) *
+    PAGE_SIZE;
 
-      `
-        <strong>
-          ✓ アップロード完了
-        </strong>
 
-        <div style="margin-top:8px;">
-          <b>${safeName}</b>
-        </div>
+  const pageFiles =
+    filteredFiles.slice(
+      start,
+      start + PAGE_SIZE
+    );
+
+
+  fileList.innerHTML =
+    pageFiles
+      .map(
+        createFileHTML
+      )
+      .join("");
+
+
+  renderPagination(
+    totalPages
+  );
+}
+
+
+/* =========================================================
+   File HTML
+========================================================= */
+
+function createFileHTML(file) {
+
+  const passwordBadge =
+    file.has_password !== false
+      ? "🔒"
+      : "";
+
+
+  return `
+    <div class="file-item">
+
+      <div class="file-item-icon">
+        ${getFileIcon(file)}
+      </div>
+
+      <div class="file-item-main">
 
         <div
-          style="
-            margin-top:10px;
-            padding:10px;
-            border-radius:9px;
-            background:#fff8df;
-            color:#84671f;
-          "
+          class="file-item-name"
+          title="${escapeHTML(file.name)}"
         >
-          <b>削除キー</b><br>
-          <code
-            style="
-              word-break:break-all;
-              font-size:12px;
-            "
-          >${safeKey}</code>
+          ${escapeHTML(file.name)}
+        </div>
 
-          <br><br>
+        <div class="file-item-meta">
 
           <span>
-            ⚠ このキーはこの画面でしか表示しません。
-            必要なら安全な場所に保存してください。
-          </span>
-        </div>
-      `
-    );
-  }
-
-
-  /* =======================================================
-     File List
-  ======================================================= */
-
-  async function loadFiles() {
-
-    if (!supabaseClient) {
-      return;
-    }
-
-
-    showLoading(
-      "ファイル一覧を読み込んでいます..."
-    );
-
-
-    try {
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
-          .from("files")
-          .select(
-            `
-              id,
-              name,
-              storage_path,
-              size,
-              mime_type,
-              public_url,
-              created_at,
-              password_salt,
-              password_hash,
-              has_password,
-              delete_salt,
-              delete_hash
-            `
-          )
-          .order(
-            "created_at",
-            {
-              ascending: false
-            }
-          );
-
-
-      if (error) {
-
-        console.error(
-          "Load files error:",
-          error
-        );
-
-        throw new Error(
-          error.message ||
-          "ファイル一覧を取得できませんでした。"
-        );
-      }
-
-
-      allFiles =
-        Array.isArray(data)
-          ? data
-          : [];
-
-
-      applySearch();
-
-
-    } catch (error) {
-
-      console.error(error);
-
-      fileList.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">!</div>
-          <h3>読み込みに失敗しました</h3>
-          <p>${escapeHtml(
-            error.message ||
-            "不明なエラー"
-          )}</p>
-        </div>
-      `;
-
-      fileCount.textContent =
-        "0 件";
-
-    } finally {
-
-      hideLoading();
-    }
-  }
-
-
-  /* =======================================================
-     Search
-  ======================================================= */
-
-  function applySearch() {
-
-    const query =
-      String(
-        searchInput.value || ""
-      )
-        .trim()
-        .toLowerCase();
-
-
-    if (!query) {
-
-      filteredFiles =
-        [...allFiles];
-
-    } else {
-
-      filteredFiles =
-        allFiles.filter(
-          (file) =>
-            String(
-              file.name || ""
-            )
-              .toLowerCase()
-              .includes(query)
-        );
-    }
-
-
-    currentPage = 1;
-
-    updateSearchClear();
-
-    renderFileList();
-
-    renderPagination();
-  }
-
-
-  function updateSearchClear() {
-
-    if (
-      searchInput.value
-    ) {
-
-      searchClear.classList.remove(
-        "hidden"
-      );
-
-    } else {
-
-      searchClear.classList.add(
-        "hidden"
-      );
-    }
-  }
-
-
-  /* =======================================================
-     File List Render
-  ======================================================= */
-
-  function renderFileList() {
-
-    fileCount.textContent =
-      `${filteredFiles.length} 件`;
-
-
-    if (
-      filteredFiles.length === 0
-    ) {
-
-      fileList.innerHTML = `
-        <div class="empty-state">
-
-          <div class="empty-icon">
-            ${allFiles.length === 0
-              ? "📁"
-              : "🔎"}
-          </div>
-
-          <h3>
-            ${
-              allFiles.length === 0
-                ? "まだファイルがありません"
-                : "ファイルが見つかりません"
-            }
-          </h3>
-
-          <p>
-            ${
-              allFiles.length === 0
-                ? "ファイルをアップロードするとここに表示されます。"
-                : "検索条件を変更してみてください。"
-            }
-          </p>
-
-        </div>
-      `;
-
-      return;
-    }
-
-
-    const start =
-      (currentPage - 1) *
-      FILES_PER_PAGE;
-
-    const end =
-      start +
-      FILES_PER_PAGE;
-
-    const pageFiles =
-      filteredFiles.slice(
-        start,
-        end
-      );
-
-
-    fileList.innerHTML =
-      pageFiles
-        .map(
-          (file) =>
-            createFileItem(file)
-        )
-        .join("");
-
-
-    attachFileActionEvents();
-  }
-
-
-  /* =======================================================
-     File Item
-  ======================================================= */
-
-  function createFileItem(file) {
-
-    const id =
-      Number(file.id);
-
-    const name =
-      escapeHtml(
-        file.name ||
-        "名称未設定"
-      );
-
-    const size =
-      formatFileSize(
-        file.size
-      );
-
-    const date =
-      escapeHtml(
-        formatDate(
-          file.created_at
-        )
-      );
-
-    const icon =
-      getFileIcon(file);
-
-    const hasPassword =
-      Boolean(
-        file.password_hash &&
-        file.password_salt
-      );
-
-
-    return `
-      <div
-        class="file-item"
-        data-file-id="${id}"
-      >
-
-        <div class="file-item-icon">
-          ${icon}
-        </div>
-
-        <div class="file-item-main">
-
-          <span
-            class="file-item-name"
-            title="${name}"
-          >
-            ${name}
+            ${formatFileSize(file.size)}
           </span>
 
-          <div class="file-item-meta">
+          <span>
+            ${formatDate(file.created_at)}
+          </span>
 
-            <span>
-              ${size}
-            </span>
-
-            <span>
-              ${date}
-            </span>
-
-            ${
-              hasPassword
-                ? `
-                  <span class="password-badge">
-                    🔒 パスワード保護
-                  </span>
-                `
-                : `
-                  <span>
-                    ⚠ 保護情報なし
-                  </span>
-                `
-            }
-
-          </div>
-
-        </div>
-
-
-        <div
-          class="file-actions"
-          data-actions-for="${id}"
-        >
-
-          ${
-            hasPassword
-              ? `
-                <button
-                  type="button"
-                  class="file-action unlock"
-                  data-action="unlock"
-                  data-id="${id}"
-                >
-                  🔓
-                  <span>解除</span>
-                </button>
-
-                <button
-                  type="button"
-                  class="file-action download"
-                  data-action="download"
-                  data-id="${id}"
-                >
-                  ⬇️
-                  <span>ダウンロード</span>
-                </button>
-
-                <button
-                  type="button"
-                  class="file-action url"
-                  data-action="url"
-                  data-id="${id}"
-                >
-                  🔗
-                  <span>URL</span>
-                </button>
-              `
-              : `
-                <button
-                  type="button"
-                  class="file-action download"
-                  data-action="download"
-                  data-id="${id}"
-                >
-                  ⬇️
-                  <span>ダウンロード</span>
-                </button>
-
-                <button
-                  type="button"
-                  class="file-action url"
-                  data-action="url"
-                  data-id="${id}"
-                >
-                  🔗
-                  <span>URL</span>
-                </button>
-              `
-          }
-
-          <button
-            type="button"
-            class="file-action delete"
-            data-action="delete"
-            data-id="${id}"
-          >
-            🗑️
-            <span>削除</span>
-          </button>
+          <span>
+            ${passwordBadge}
+          </span>
 
         </div>
 
       </div>
+
+      <div class="file-actions">
+
+        <button
+          type="button"
+          class="file-action"
+          data-action="download"
+          data-id="${file.id}"
+        >
+          ↓ ダウンロード
+        </button>
+
+        <button
+          type="button"
+          class="file-action"
+          data-action="url"
+          data-id="${file.id}"
+        >
+          🔗 URL
+        </button>
+
+        <button
+          type="button"
+          class="file-action delete"
+          data-action="delete"
+          data-id="${file.id}"
+        >
+          🗑 削除
+        </button>
+
+      </div>
+
+    </div>
+  `;
+}
+
+
+/* =========================================================
+   Pagination
+========================================================= */
+
+function renderPagination(
+  totalPages
+) {
+
+  if (
+    totalPages <= 1
+  ) {
+
+    pagination.innerHTML =
+      "";
+
+    return;
+  }
+
+
+  let html = "";
+
+
+  html += `
+    <button
+      class="page-button"
+      ${currentPage === 1 ? "disabled" : ""}
+      data-page="${currentPage - 1}"
+    >
+      ‹
+    </button>
+  `;
+
+
+  for (
+    let i = 1;
+    i <= totalPages;
+    i++
+  ) {
+
+    html += `
+      <button
+        class="page-button ${
+          i === currentPage
+            ? "active"
+            : ""
+        }"
+        data-page="${i}"
+      >
+        ${i}
+      </button>
     `;
   }
 
 
-  /* =======================================================
-     Action Events
-  ======================================================= */
-
-  function attachFileActionEvents() {
-
-    const buttons =
-      fileList.querySelectorAll(
-        "[data-action]"
-      );
-
-
-    buttons.forEach(
-      (button) => {
-
-        button.addEventListener(
-          "click",
-          async () => {
-
-            const action =
-              button.dataset.action;
-
-            const id =
-              Number(
-                button.dataset.id
-              );
-
-            const file =
-              allFiles.find(
-                (item) =>
-                  Number(item.id) === id
-              );
-
-
-            if (!file) {
-
-              showToast(
-                "ファイル情報が見つかりません。",
-                "error"
-              );
-
-              return;
-            }
-
-
-            if (
-              action === "unlock"
-            ) {
-
-              openPasswordModal(
-                file
-              );
-
-              return;
-            }
-
-
-            if (
-              action === "download"
-            ) {
-
-              await downloadFile(
-                file
-              );
-
-              return;
-            }
-
-
-            if (
-              action === "url"
-            ) {
-
-              await showFileUrl(
-                file
-              );
-
-              return;
-            }
-
-
-            if (
-              action === "delete"
-            ) {
-
-              openDeleteModal(
-                file
-              );
-
-            }
-
-          }
-        );
+  html += `
+    <button
+      class="page-button"
+      ${
+        currentPage === totalPages
+          ? "disabled"
+          : ""
       }
+      data-page="${currentPage + 1}"
+    >
+      ›
+    </button>
+  `;
+
+
+  pagination.innerHTML =
+    html;
+}
+
+
+/* =========================================================
+   File Actions
+========================================================= */
+
+function handleFileAction(
+  action,
+  id
+) {
+
+  const file =
+    allFiles.find(
+      item =>
+        String(item.id) ===
+        String(id)
     );
+
+
+  if (!file) {
+
+    alert(
+      "ファイルが見つかりません。"
+    );
+
+    return;
   }
 
 
-  /* =======================================================
-     Pagination
-  ======================================================= */
-
-  function renderPagination() {
-
-    pagination.innerHTML = "";
-
-
-    const totalPages =
-      Math.ceil(
-        filteredFiles.length /
-        FILES_PER_PAGE
-      );
-
-
-    if (
-      totalPages <= 1
-    ) {
-      return;
-    }
-
-
-    const prev =
-      document.createElement(
-        "button"
-      );
-
-    prev.className =
-      "page-button";
-
-    prev.textContent =
-      "‹";
-
-    prev.disabled =
-      currentPage <= 1;
-
-    prev.addEventListener(
-      "click",
-      () => {
-
-        if (
-          currentPage <= 1
-        ) {
-          return;
-        }
-
-        currentPage--;
-
-        renderFileList();
-
-        renderPagination();
-
-        scrollToFiles();
-
-      }
-    );
-
-    pagination.appendChild(
-      prev
-    );
-
-
-    const maxButtons = 7;
-
-    let startPage =
-      Math.max(
-        1,
-        currentPage -
-        Math.floor(
-          maxButtons / 2
-        )
-      );
-
-    let endPage =
-      Math.min(
-        totalPages,
-        startPage +
-        maxButtons -
-        1
-      );
-
-
-    if (
-      endPage -
-      startPage +
-      1 <
-      maxButtons
-    ) {
-
-      startPage =
-        Math.max(
-          1,
-          endPage -
-          maxButtons +
-          1
-        );
-    }
-
-
-    for (
-      let page = startPage;
-      page <= endPage;
-      page++
-    ) {
-
-      const button =
-        document.createElement(
-          "button"
-        );
-
-      button.className =
-        "page-button";
-
-      if (
-        page === currentPage
-      ) {
-
-        button.classList.add(
-          "active"
-        );
-      }
-
-      button.textContent =
-        String(page);
-
-      button.addEventListener(
-        "click",
-        () => {
-
-          currentPage =
-            page;
-
-          renderFileList();
-
-          renderPagination();
-
-          scrollToFiles();
-
-        }
-      );
-
-      pagination.appendChild(
-        button
-      );
-    }
-
-
-    const next =
-      document.createElement(
-        "button"
-      );
-
-    next.className =
-      "page-button";
-
-    next.textContent =
-      "›";
-
-    next.disabled =
-      currentPage >= totalPages;
-
-    next.addEventListener(
-      "click",
-      () => {
-
-        if (
-          currentPage >= totalPages
-        ) {
-          return;
-        }
-
-        currentPage++;
-
-        renderFileList();
-
-        renderPagination();
-
-        scrollToFiles();
-
-      }
-    );
-
-    pagination.appendChild(
-      next
-    );
-  }
-
-
-  function scrollToFiles() {
-
-    const card =
-      document.querySelector(
-        ".files-card"
-      );
-
-    if (!card) {
-      return;
-    }
-
-    card.scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
-  }
-
-
-  /* =======================================================
-     Password Modal
-  ======================================================= */
-
-  function openPasswordModal(file) {
-
-    currentPasswordFile =
-      file;
-
-    passwordModalFileName.textContent =
-      file.name ||
-      "ファイル";
-
-    filePasswordInput.value = "";
-
-    passwordError.classList.add(
-      "hidden"
-    );
-
-    passwordError.textContent =
-      "";
-
-    passwordModal.classList.remove(
-      "hidden"
-    );
-
-    setTimeout(() => {
-
-      filePasswordInput.focus();
-
-    }, 50);
-  }
-
-
-  function closePasswordModal() {
-
-    currentPasswordFile =
-      null;
-
-    passwordModal.classList.add(
-      "hidden"
-    );
-
-    filePasswordInput.value = "";
-
-    passwordError.classList.add(
-      "hidden"
-    );
-  }
-
-
-  function showPasswordError(
-    message
+  if (
+    action === "delete"
   ) {
 
-    passwordError.textContent =
-      message;
-
-    passwordError.classList.remove(
-      "hidden"
+    openDeleteModal(
+      file
     );
+
+    return;
   }
 
 
-  /* =======================================================
-     Password Verify
-  ======================================================= */
+  openPasswordModal(
+    file,
+    action
+  );
+}
 
-  async function verifyFilePassword() {
+
+/* =========================================================
+   Password Modal
+========================================================= */
+
+function openPasswordModal(
+  file,
+  action
+) {
+
+  currentFile =
+    file;
+
+  currentAction =
+    action;
+
+
+  passwordModalFileName.textContent =
+    `「${file.name}」を操作するにはパスワードを入力してください。`;
+
+
+  accessPassword.value =
+    "";
+
+  passwordError.classList.add(
+    "hidden"
+  );
+
+  openModal(
+    "passwordModal"
+  );
+
+
+  setTimeout(
+    () => {
+      accessPassword.focus();
+    },
+    50
+  );
+}
+
+
+async function submitPassword() {
+
+  if (!currentFile) {
+    return;
+  }
+
+
+  const password =
+    accessPassword.value;
+
+
+  if (!password) {
+
+    showPasswordError(
+      "パスワードを入力してください。"
+    );
+
+    return;
+  }
+
+
+  passwordSubmit.disabled =
+    true;
+
+  passwordSubmit.textContent =
+    "確認中...";
+
+
+  try {
+
+    const result =
+      await callFileAccess(
+        "verify",
+        currentFile.id,
+        password
+      );
+
 
     if (
-      !currentPasswordFile
+      !result ||
+      !result.success
     ) {
-      return;
-    }
 
-
-    const password =
-      filePasswordInput.value;
-
-
-    if (!password) {
-
-      showPasswordError(
-        "パスワードを入力してください。"
-      );
-
-      return;
-    }
-
-
-    verifyPasswordButton.disabled =
-      true;
-
-    verifyPasswordButton.textContent =
-      "確認中...";
-
-
-    try {
-
-      const result =
-        await callEdgeFunction(
-          {
-            action: "url",
-
-            fileId:
-              currentPasswordFile.id,
-
-            password
-          }
-        );
-
-
-      if (
-        !result ||
-        !result.success
-      ) {
-
-        throw new Error(
-          result?.error ||
-          "パスワードの確認に失敗しました。"
-        );
-      }
-
-
-      /*
-       * このファイルについて
-       * 認証済みとしてマーク。
-       */
-
-      markFileUnlocked(
-        currentPasswordFile.id
-      );
-
-
-      closePasswordModal();
-
-      showToast(
-        "パスワードを確認しました！"
-      );
-
-
-    } catch (error) {
-
-      console.error(
-        "Password verification error:",
-        error
-      );
-
-      showPasswordError(
-        error.message ||
+      throw new Error(
+        result?.error ||
         "パスワードが違います。"
       );
-
-    } finally {
-
-      verifyPasswordButton.disabled =
-        false;
-
-      verifyPasswordButton.textContent =
-        "🔓 ロックを解除";
     }
+
+
+    closeModal(
+      "passwordModal"
+    );
+
+
+    if (
+      currentAction ===
+      "download"
+    ) {
+
+      await downloadFile(
+        currentFile.id,
+        password
+      );
+
+    } else if (
+      currentAction ===
+      "url"
+    ) {
+
+      await showFileURL(
+        currentFile.id,
+        password
+      );
+    }
+
+
+  } catch (error) {
+
+    console.error(
+      "Password verification error:",
+      error
+    );
+
+    showPasswordError(
+      getErrorMessage(error)
+    );
+
+  } finally {
+
+    passwordSubmit.disabled =
+      false;
+
+    passwordSubmit.textContent =
+      "確認する";
+  }
+}
+
+
+function showPasswordError(
+  message
+) {
+
+  passwordError.textContent =
+    message;
+
+  passwordError.classList.remove(
+    "hidden"
+  );
+}
+
+
+/* =========================================================
+   Edge Function
+========================================================= */
+
+async function callFileAccess(
+  action,
+  fileId,
+  password = "",
+  deleteKey = ""
+) {
+
+  if (!supabaseClient) {
+
+    throw new Error(
+      "Supabaseが初期化されていません。"
+    );
   }
 
 
-  /*
-   * sessionStorageを使用。
-   *
-   * ページを閉じれば基本的に
-   * 認証状態も消えます。
-   */
+  const session =
+    await supabaseClient.auth.getSession();
 
-  function getUnlockedIds() {
 
-    try {
+  const accessToken =
+    session?.data?.session
+      ?.access_token;
 
-      const raw =
-        sessionStorage.getItem(
-          "filebox_unlocked"
-        );
 
-      if (!raw) {
-        return {};
+  const body = {
+    action,
+    fileId
+  };
+
+
+  if (password) {
+    body.password =
+      password;
+  }
+
+
+  if (deleteKey) {
+    body.deleteKey =
+      deleteKey;
+  }
+
+
+  const response =
+    await fetch(
+      `${SUPABASE_URL}/functions/v1/file-access`,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          "apikey":
+            SUPABASE_PUBLISHABLE_KEY,
+
+          ...(accessToken
+            ? {
+                "Authorization":
+                  `Bearer ${accessToken}`
+              }
+            : {})
+        },
+
+        body:
+          JSON.stringify(body)
       }
+    );
 
-      return JSON.parse(raw);
 
-    } catch {
+  let result = null;
 
-      return {};
-    }
+
+  try {
+
+    result =
+      await response.json();
+
+  } catch {
+
+    result = {
+      error:
+        "サーバーから正しい応答がありません。"
+    };
   }
 
 
-  function markFileUnlocked(id) {
+  if (!response.ok) {
 
-    const unlocked =
-      getUnlockedIds();
-
-    unlocked[String(id)] =
-      true;
-
-    try {
-
-      sessionStorage.setItem(
-        "filebox_unlocked",
-        JSON.stringify(
-          unlocked
-        )
-      );
-
-    } catch (error) {
-
-      console.warn(
-        "sessionStorage error:",
-        error
-      );
-    }
-
-
-    updateFileActionState(
-      id
+    throw new Error(
+      result?.error ||
+      `サーバーエラー (${response.status})`
     );
   }
 
 
-  function isFileUnlocked(id) {
-
-    const unlocked =
-      getUnlockedIds();
-
-    return Boolean(
-      unlocked[String(id)]
-    );
-  }
+  return result;
+}
 
 
-  function updateFileActionState(id) {
+/* =========================================================
+   Download
+========================================================= */
 
-    const actions =
-      fileList.querySelector(
-        `[data-actions-for="${CSS.escape(String(id))}"]`
+async function downloadFile(
+  fileId,
+  password
+) {
+
+  showLoading(
+    "ダウンロードURLを取得しています..."
+  );
+
+
+  try {
+
+    const result =
+      await callFileAccess(
+        "download",
+        fileId,
+        password
       );
 
-    if (!actions) {
-      return;
-    }
 
     if (
-      isFileUnlocked(id)
+      !result?.url
     ) {
 
-      actions.classList.add(
-        "unlocked"
+      throw new Error(
+        "ダウンロードURLを取得できませんでした。"
       );
-
-    } else {
-
-      actions.classList.remove(
-        "unlocked"
-      );
-    }
-  }
-
-
-  /* =======================================================
-     Download
-  ======================================================= */
-
-  async function downloadFile(file) {
-
-    /*
-     * パスワード保護ファイルの場合、
-     * 先に解除が必要。
-     */
-
-    if (
-      file.password_hash &&
-      file.password_salt &&
-      !isFileUnlocked(file.id)
-    ) {
-
-      openPasswordModal(
-        file
-      );
-
-      return;
     }
 
 
     showLoading(
-      "ダウンロードURLを作成しています..."
+      "ファイルをダウンロードしています..."
     );
 
 
-    try {
-
-      const password =
-        getTemporaryPasswordForFile(
-          file.id
-        );
-
-
-      let result;
-
-
-      /*
-       * パスワード保護あり
-       */
-
-      if (
-        file.password_hash &&
-        file.password_salt
-      ) {
-
-        /*
-         * フロント側には
-         * パスワードそのものを
-         * 保存していないので、
-         * unlock時のsigned URLを
-         * 再利用する方法ではなく、
-         * sessionStorageに一時認証情報を
-         * 保存する方式にはしていません。
-         *
-         * そのため、実際のダウンロード時は
-         * 再度パスワードが必要になる場合があります。
-         *
-         * 下のgetStoredPassword()が
-         * 空の場合はモーダルを開きます。
-         */
-
-        const storedPassword =
-          getStoredPassword(
-            file.id
-          );
-
-        if (!storedPassword) {
-
-          hideLoading();
-
-          openPasswordModal(
-            file
-          );
-
-          return;
-        }
-
-
-        result =
-          await callEdgeFunction(
-            {
-              action: "download",
-
-              fileId:
-                file.id,
-
-              password:
-                storedPassword
-            }
-          );
-
-      } else {
-
-        /*
-         * パスワードなしの
-         * 古いファイル向け。
-         */
-
-        result =
-          await callEdgeFunction(
-            {
-              action: "download",
-
-              fileId:
-                file.id,
-
-              password:
-                "legacy"
-            }
-          );
-      }
-
-
-      if (
-        !result?.success ||
-        !result?.url
-      ) {
-
-        throw new Error(
-          result?.error ||
-          "ダウンロードURLを取得できませんでした。"
-        );
-      }
-
-
-      await forceDownload(
-        result.url,
-        file.name
-      );
-
-
-      showToast(
-        "ダウンロードを開始しました！"
-      );
-
-
-    } catch (error) {
-
-      console.error(
-        "Download error:",
-        error
-      );
-
-      showToast(
-        error.message ||
-        "ダウンロードに失敗しました。",
-        "error"
-      );
-
-    } finally {
-
-      hideLoading();
-    }
-  }
-
-
-  /*
-   * 旧コード互換用。
-   */
-
-  function getTemporaryPasswordForFile() {
-    return null;
-  }
-
-
-  /* =======================================================
-     パスワード保存
-  =======================================================
-
-     パスワードそのものを保存すると
-     セキュリティ上よくないため、
-     今回は「解除済み」の状態と
-     一時的な認証情報だけを扱います。
-
-     実際にはブラウザにパスワードを
-     永久保存しない構成です。
-  ======================================================= */
-
-  function getStoredPassword(id) {
-
-    try {
-
-      return sessionStorage.getItem(
-        `filebox_password_${id}`
-      );
-
-    } catch {
-
-      return null;
-    }
-  }
-
-
-  function storeTemporaryPassword(
-    id,
-    password
-  ) {
-
-    try {
-
-      sessionStorage.setItem(
-        `filebox_password_${id}`,
-        password
-      );
-
-    } catch (error) {
-
-      console.warn(
-        error
-      );
-    }
-  }
-
-
-  /* =======================================================
-     パスワード確認処理を上書き
-  ======================================================= */
-
-  const originalVerify =
-    verifyFilePassword;
-
-
-  /*
-   * unlock成功時に
-   * 次回ダウンロードでも使えるように
-   * sessionStorageへ一時保存。
-   */
-
-  async function verifyPasswordAndStore() {
-
-    if (
-      !currentPasswordFile
-    ) {
-      return;
-    }
-
-
-    const file =
-      currentPasswordFile;
-
-    const password =
-      filePasswordInput.value;
-
-
-    if (!password) {
-
-      showPasswordError(
-        "パスワードを入力してください。"
-      );
-
-      return;
-    }
-
-
-    verifyPasswordButton.disabled =
-      true;
-
-    verifyPasswordButton.textContent =
-      "確認中...";
-
-
-    try {
-
-      const result =
-        await callEdgeFunction(
-          {
-            action: "url",
-
-            fileId:
-              file.id,
-
-            password
-          }
-        );
-
-
-      if (
-        !result?.success
-      ) {
-
-        throw new Error(
-          result?.error ||
-          "パスワードが違います。"
-        );
-      }
-
-
-      /*
-       * 5分程度で再入力が必要になる
-       * signed URLを発行した後、
-       * パスワード自体はsessionStorageに
-       * 一時保存。
-       *
-       * ページを閉じると消えます。
-       */
-
-      storeTemporaryPassword(
-        file.id,
-        password
-      );
-
-      markFileUnlocked(
-        file.id
-      );
-
-
-      closePasswordModal();
-
-      showToast(
-        "ロックを解除しました！"
-      );
-
-
-    } catch (error) {
-
-      console.error(
-        error
-      );
-
-      showPasswordError(
-        error.message ||
-        "パスワードが違います。"
-      );
-
-    } finally {
-
-      verifyPasswordButton.disabled =
-        false;
-
-      verifyPasswordButton.textContent =
-        "🔓 ロックを解除";
-    }
-  }
-
-
-  /*
-   * 上の関数を実際のボタンに接続
-   */
-
-  if (verifyPasswordButton) {
-
-    verifyPasswordButton.onclick =
-      verifyPasswordAndStore;
-  }
-
-
-  /* =======================================================
-     Force Download
-  ======================================================= */
-
-  async function forceDownload(
-    url,
-    fileName
-  ) {
-
-    /*
-     * fetch → Blob → download
-     *
-     * これによって画像などが
-     * 新しいタブで開かれるだけになる
-     * 問題を避けます。
-     */
-
     const response =
       await fetch(
-        url
+        result.url
       );
 
 
     if (!response.ok) {
 
       throw new Error(
-        `ファイル取得に失敗しました (${response.status})`
+        "ファイルの取得に失敗しました。"
       );
     }
 
@@ -2685,746 +1718,888 @@ document.addEventListener("DOMContentLoaded", () => {
       await response.blob();
 
 
-    const blobUrl =
+    const url =
       URL.createObjectURL(
         blob
       );
 
 
-    const anchor =
+    const a =
       document.createElement(
         "a"
       );
 
-    anchor.href =
-      blobUrl;
 
-    anchor.download =
-      fileName ||
+    a.href =
+      url;
+
+    a.download =
+      currentFile?.name ||
       "download";
+
+    a.style.display =
+      "none";
 
 
     document.body.appendChild(
-      anchor
+      a
     );
 
-    anchor.click();
+    a.click();
 
-    anchor.remove();
+    a.remove();
 
 
-    setTimeout(() => {
-
-      URL.revokeObjectURL(
-        blobUrl
-      );
-
-    }, 2000);
-  }
-
-
-  /* =======================================================
-     URL
-  ======================================================= */
-
-  async function showFileUrl(file) {
-
-    if (
-      file.password_hash &&
-      file.password_salt &&
-      !isFileUnlocked(file.id)
-    ) {
-
-      openPasswordModal(
-        file
-      );
-
-      return;
-    }
-
-
-    const storedPassword =
-      getStoredPassword(
-        file.id
-      );
-
-
-    if (
-      file.password_hash &&
-      file.password_salt &&
-      !storedPassword
-    ) {
-
-      openPasswordModal(
-        file
-      );
-
-      return;
-    }
-
-
-    showLoading(
-      "URLを作成しています..."
-    );
-
-
-    try {
-
-      const result =
-        await callEdgeFunction(
-          {
-            action: "url",
-
-            fileId:
-              file.id,
-
-            password:
-              storedPassword ||
-              "legacy"
-          }
-        );
-
-
-      if (
-        !result?.success ||
-        !result?.url
-      ) {
-
-        throw new Error(
-          result?.error ||
-          "URLを取得できませんでした。"
-        );
-      }
-
-
-      currentSignedUrl =
-        result.url;
-
-
-      urlInput.value =
-        result.url;
-
-
-      urlModal.classList.remove(
-        "hidden"
-      );
-
-
-    } catch (error) {
-
-      console.error(
-        error
-      );
-
-      showToast(
-        error.message ||
-        "URL取得に失敗しました。",
-        "error"
-      );
-
-    } finally {
-
-      hideLoading();
-    }
-  }
-
-
-  /* =======================================================
-     Delete Modal
-  ======================================================= */
-
-  function openDeleteModal(file) {
-
-    currentDeleteFile =
-      file;
-
-    deleteModalFileName.textContent =
-      file.name ||
-      "ファイル";
-
-    deleteKeyInput.value = "";
-
-    deleteError.classList.add(
-      "hidden"
-    );
-
-    deleteError.textContent =
-      "";
-
-    deleteModal.classList.remove(
-      "hidden"
-    );
-
-
-    setTimeout(() => {
-
-      deleteKeyInput.focus();
-
-    }, 50);
-  }
-
-
-  function closeDeleteModal() {
-
-    currentDeleteFile =
-      null;
-
-    deleteModal.classList.add(
-      "hidden"
-    );
-
-    deleteKeyInput.value = "";
-
-    deleteError.classList.add(
-      "hidden"
-    );
-  }
-
-
-  /* =======================================================
-     Delete
-  ======================================================= */
-
-  async function deleteFile() {
-
-    if (
-      !currentDeleteFile
-    ) {
-      return;
-    }
-
-
-    const deleteKey =
-      deleteKeyInput.value.trim();
-
-
-    if (!deleteKey) {
-
-      deleteError.textContent =
-        "削除キーを入力してください。";
-
-      deleteError.classList.remove(
-        "hidden"
-      );
-
-      return;
-    }
-
-
-    confirmDeleteButton.disabled =
-      true;
-
-    confirmDeleteButton.textContent =
-      "削除中...";
-
-
-    try {
-
-      const result =
-        await callEdgeFunction(
-          {
-            action: "delete",
-
-            fileId:
-              currentDeleteFile.id,
-
-            deleteKey
-          }
-        );
-
-
-      if (
-        !result?.success
-      ) {
-
-        throw new Error(
-          result?.error ||
-          "ファイルを削除できませんでした。"
-        );
-      }
-
-
-      const deletedId =
-        currentDeleteFile.id;
-
-
-      closeDeleteModal();
-
-
-      /*
-       * 認証情報も削除
-       */
-
-      try {
-
-        sessionStorage.removeItem(
-          `filebox_password_${deletedId}`
-        );
-
-      } catch {}
-
-
-      showToast(
-        "ファイルを削除しました。"
-      );
-
-
-      await loadFiles();
-
-
-    } catch (error) {
-
-      console.error(
-        "Delete error:",
-        error
-      );
-
-
-      deleteError.textContent =
-        error.message ||
-        "削除に失敗しました。";
-
-      deleteError.classList.remove(
-        "hidden"
-      );
-
-
-    } finally {
-
-      confirmDeleteButton.disabled =
-        false;
-
-      confirmDeleteButton.textContent =
-        "🗑️ 削除する";
-    }
-  }
-
-
-  /* =======================================================
-     Edge Function
-  ======================================================= */
-
-  async function callEdgeFunction(
-    body
-  ) {
-
-    const endpoint =
-      `${SUPABASE_URL}/functions/v1/${EDGE_FUNCTION_NAME}`;
-
-
-    const response =
-      await fetch(
-        endpoint,
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-
-            "apikey":
-              SUPABASE_ANON_KEY,
-
-            "Authorization":
-              `Bearer ${SUPABASE_ANON_KEY}`
-          },
-
-          body:
-            JSON.stringify(body)
-        }
-      );
-
-
-    let data = null;
-
-
-    try {
-
-      data =
-        await response.json();
-
-    } catch {
-
-      throw new Error(
-        `サーバーから正常なJSONが返ってきませんでした (${response.status})`
-      );
-    }
-
-
-    if (!response.ok) {
-
-      throw new Error(
-        data?.error ||
-        `サーバーエラー (${response.status})`
-      );
-    }
-
-
-    return data;
-  }
-
-
-  /* =======================================================
-     Copy URL
-  ======================================================= */
-
-  async function copyUrl() {
-
-    const value =
-      urlInput.value;
-
-
-    if (!value) {
-      return;
-    }
-
-
-    try {
-
-      await navigator.clipboard.writeText(
-        value
-      );
-
-
-      copyUrlButton.textContent =
-        "コピーしました！";
-
-
-      showToast(
-        "URLをコピーしました！"
-      );
-
-
-      setTimeout(() => {
-
-        copyUrlButton.textContent =
-          "コピー";
-
-      }, 1600);
-
-
-    } catch (error) {
-
-      /*
-       * Clipboard APIが使えない場合
-       */
-
-      urlInput.focus();
-
-      urlInput.select();
-
-      document.execCommand(
-        "copy"
-      );
-
-
-      showToast(
-        "URLをコピーしました！"
-      );
-    }
-  }
-
-
-  /* =======================================================
-     Modal Close
-  ======================================================= */
-
-  document
-    .querySelectorAll(
-      "[data-close]"
-    )
-    .forEach(
-      (button) => {
-
-        button.addEventListener(
-          "click",
-          () => {
-
-            const id =
-              button.dataset.close;
-
-            const modal =
-              document.getElementById(
-                id
-              );
-
-            if (modal) {
-
-              modal.classList.add(
-                "hidden"
-              );
-            }
-
-          }
-        );
-      }
-    );
-
-
-  /*
-   * 背景クリックでも閉じる
-   */
-
-  [
-    passwordModal,
-    deleteModal,
-    urlModal
-  ].forEach(
-    (modal) => {
-
-      if (!modal) {
-        return;
-      }
-
-      const backdrop =
-        modal.querySelector(
-          ".modal-backdrop"
-        );
-
-      if (!backdrop) {
-        return;
-      }
-
-      backdrop.addEventListener(
-        "click",
-        () => {
-
-          modal.classList.add(
-            "hidden"
-          );
-
-        }
-      );
-    }
-  );
-
-
-  /* =======================================================
-     ESCでModalを閉じる
-  ======================================================= */
-
-  document.addEventListener(
-    "keydown",
-    (event) => {
-
-      if (
-        event.key !== "Escape"
-      ) {
-        return;
-      }
-
-
-      [
-        passwordModal,
-        deleteModal,
-        urlModal
-      ].forEach(
-        (modal) => {
-
-          if (modal) {
-
-            modal.classList.add(
-              "hidden"
-            );
-          }
-        }
-      );
-    }
-  );
-
-
-  /* =======================================================
-     Enter
-  ======================================================= */
-
-  if (filePasswordInput) {
-
-    filePasswordInput.addEventListener(
-      "keydown",
-      (event) => {
-
-        if (
-          event.key === "Enter"
-        ) {
-
-          event.preventDefault();
-
-          verifyPasswordAndStore();
-        }
-
-      }
-    );
-  }
-
-
-  if (deleteKeyInput) {
-
-    deleteKeyInput.addEventListener(
-      "keydown",
-      (event) => {
-
-        if (
-          event.key === "Enter"
-        ) {
-
-          event.preventDefault();
-
-          deleteFile();
-        }
-
-      }
-    );
-  }
-
-
-  /* =======================================================
-     Search Event
-  ======================================================= */
-
-  if (searchInput) {
-
-    let searchTimer = null;
-
-    searchInput.addEventListener(
-      "input",
+    setTimeout(
       () => {
-
-        clearTimeout(
-          searchTimer
+        URL.revokeObjectURL(
+          url
         );
-
-        searchTimer =
-          setTimeout(
-            applySearch,
-            120
-          );
-
-      }
+      },
+      1000
     );
-  }
-
-
-  if (searchClear) {
-
-    searchClear.addEventListener(
-      "click",
-      () => {
-
-        searchInput.value = "";
-
-        applySearch();
-
-        searchInput.focus();
-
-      }
-    );
-  }
-
-
-  /* =======================================================
-     Reload
-  ======================================================= */
-
-  if (reloadButton) {
-
-    reloadButton.addEventListener(
-      "click",
-      async () => {
-
-        await loadFiles();
-
-        showToast(
-          "一覧を更新しました。"
-        );
-
-      }
-    );
-  }
-
-
-  /* =======================================================
-     Upload Event
-  ======================================================= */
-
-  if (uploadButton) {
-
-    uploadButton.addEventListener(
-      "click",
-      uploadFile
-    );
-  }
-
-
-  /* =======================================================
-     Delete Event
-  ======================================================= */
-
-  if (confirmDeleteButton) {
-
-    confirmDeleteButton.addEventListener(
-      "click",
-      deleteFile
-    );
-  }
-
-
-  /* =======================================================
-     URL Copy
-  ======================================================= */
-
-  if (copyUrlButton) {
-
-    copyUrlButton.addEventListener(
-      "click",
-      copyUrl
-    );
-  }
-
-
-  /* =======================================================
-     初期化
-  ======================================================= */
-
-  try {
-
-    const initialized =
-      initializeSupabase();
-
-
-    if (!initialized) {
-      return;
-    }
-
-
-    /*
-     * 最初はアップロードボタンを
-     * 無効化。
-     */
-
-    if (uploadButton) {
-
-      uploadButton.disabled =
-        true;
-    }
-
-
-    /*
-     * ファイル一覧を取得
-     */
-
-    loadFiles();
 
 
   } catch (error) {
 
     console.error(
-      "Application initialization error:",
+      "Download error:",
       error
     );
 
-    showFatalError(
-      "ページの初期化中にエラーが発生しました。"
+    alert(
+      "ダウンロードに失敗しました。\n\n" +
+      getErrorMessage(error)
     );
+
+  } finally {
+
+    hideLoading();
+  }
+}
+
+
+/* =========================================================
+   URL
+========================================================= */
+
+async function showFileURL(
+  fileId,
+  password
+) {
+
+  showLoading(
+    "URLを作成しています..."
+  );
+
+
+  try {
+
+    const result =
+      await callFileAccess(
+        "url",
+        fileId,
+        password
+      );
+
+
+    if (
+      !result?.url
+    ) {
+
+      throw new Error(
+        "URLを取得できませんでした。"
+      );
+    }
+
+
+    urlText.value =
+      result.url;
+
+
+    openModal(
+      "urlModal"
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "URL error:",
+      error
+    );
+
+    alert(
+      "URLの作成に失敗しました。\n\n" +
+      getErrorMessage(error)
+    );
+
+  } finally {
+
+    hideLoading();
+  }
+}
+
+
+/* =========================================================
+   Delete
+========================================================= */
+
+function openDeleteModal(
+  file
+) {
+
+  currentDeleteFile =
+    file;
+
+
+  deleteModalFileName.textContent =
+    `「${file.name}」を削除します。`;
+
+
+  deleteKeyInput.value =
+    "";
+
+  deleteError.classList.add(
+    "hidden"
+  );
+
+
+  openModal(
+    "deleteModal"
+  );
+
+
+  setTimeout(
+    () => {
+      deleteKeyInput.focus();
+    },
+    50
+  );
+}
+
+
+async function submitDelete() {
+
+  if (!currentDeleteFile) {
+    return;
   }
 
-});
+
+  const deleteKey =
+    deleteKeyInput.value.trim();
+
+
+  if (!deleteKey) {
+
+    showDeleteError(
+      "削除キーを入力してください。"
+    );
+
+    return;
+  }
+
+
+  deleteSubmit.disabled =
+    true;
+
+  deleteSubmit.textContent =
+    "削除中...";
+
+
+  try {
+
+    const result =
+      await callFileAccess(
+        "delete",
+        currentDeleteFile.id,
+        "",
+        deleteKey
+      );
+
+
+    if (
+      !result?.success
+    ) {
+
+      throw new Error(
+        result?.error ||
+        "削除に失敗しました。"
+      );
+    }
+
+
+    closeModal(
+      "deleteModal"
+    );
+
+
+    alert(
+      "ファイルを削除しました。"
+    );
+
+
+    currentDeleteFile =
+      null;
+
+
+    await loadFiles();
+
+
+  } catch (error) {
+
+    console.error(
+      "Delete error:",
+      error
+    );
+
+    showDeleteError(
+      getErrorMessage(error)
+    );
+
+  } finally {
+
+    deleteSubmit.disabled =
+      false;
+
+    deleteSubmit.textContent =
+      "削除する";
+  }
+}
+
+
+function showDeleteError(
+  message
+) {
+
+  deleteError.textContent =
+    message;
+
+  deleteError.classList.remove(
+    "hidden"
+  );
+}
+
+
+/* =========================================================
+   Copy
+========================================================= */
+
+async function copyText(
+  text
+) {
+
+  try {
+
+    await navigator.clipboard.writeText(
+      text
+    );
+
+    return true;
+
+  } catch {
+
+    try {
+
+      const textarea =
+        document.createElement(
+          "textarea"
+        );
+
+      textarea.value =
+        text;
+
+      textarea.style.position =
+        "fixed";
+
+      textarea.style.opacity =
+        "0";
+
+      document.body.appendChild(
+        textarea
+      );
+
+      textarea.focus();
+
+      textarea.select();
+
+      const success =
+        document.execCommand(
+          "copy"
+        );
+
+      textarea.remove();
+
+      return success;
+
+    } catch {
+
+      return false;
+    }
+  }
+}
+
+
+/* =========================================================
+   Events
+========================================================= */
+
+function setupEvents() {
+
+  uploadButton.addEventListener(
+    "click",
+    uploadFile
+  );
+
+
+  reloadButton.addEventListener(
+    "click",
+    async function () {
+
+      showLoading(
+        "ファイル一覧を更新しています..."
+      );
+
+      try {
+
+        await loadFiles();
+
+      } finally {
+
+        hideLoading();
+      }
+    }
+  );
+
+
+  searchInput.addEventListener(
+    "input",
+    applySearch
+  );
+
+
+  searchClear.addEventListener(
+    "click",
+    function () {
+
+      searchInput.value =
+        "";
+
+      applySearch();
+
+      searchInput.focus();
+    }
+  );
+
+
+  fileList.addEventListener(
+    "click",
+    function (event) {
+
+      const button =
+        event.target.closest(
+          "[data-action]"
+        );
+
+      if (!button) {
+        return;
+      }
+
+      handleFileAction(
+        button.dataset.action,
+        button.dataset.id
+      );
+    }
+  );
+
+
+  pagination.addEventListener(
+    "click",
+    function (event) {
+
+      const button =
+        event.target.closest(
+          "[data-page]"
+        );
+
+      if (!button) {
+        return;
+      }
+
+      const page =
+        Number(
+          button.dataset.page
+        );
+
+      if (!page) {
+        return;
+      }
+
+      currentPage =
+        page;
+
+      renderFiles();
+
+      window.scrollTo({
+        top:
+          document.querySelector(
+            ".files-card"
+          )?.offsetTop - 20 || 0,
+
+        behavior:
+          "smooth"
+      });
+    }
+  );
+
+
+  passwordSubmit.addEventListener(
+    "click",
+    submitPassword
+  );
+
+
+  accessPassword.addEventListener(
+    "keydown",
+    function (event) {
+
+      if (
+        event.key ===
+        "Enter"
+      ) {
+
+        submitPassword();
+      }
+    }
+  );
+
+
+  deleteSubmit.addEventListener(
+    "click",
+    submitDelete
+  );
+
+
+  deleteKeyInput.addEventListener(
+    "keydown",
+    function (event) {
+
+      if (
+        event.key ===
+        "Enter"
+      ) {
+
+        submitDelete();
+      }
+    }
+  );
+
+
+  copyUrlButton.addEventListener(
+    "click",
+    async function () {
+
+      const success =
+        await copyText(
+          urlText.value
+        );
+
+
+      if (success) {
+
+        copyUrlButton.textContent =
+          "コピーしました！";
+
+        setTimeout(
+          () => {
+            copyUrlButton.textContent =
+              "コピー";
+          },
+          1500
+        );
+
+      } else {
+
+        alert(
+          "コピーできませんでした。URLを手動でコピーしてください。"
+        );
+      }
+    }
+  );
+
+
+  copyDeleteKeyButton.addEventListener(
+    "click",
+    async function () {
+
+      const success =
+        await copyText(
+          deleteKeyText.textContent
+        );
+
+
+      if (success) {
+
+        copyDeleteKeyButton.textContent =
+          "コピーしました！";
+
+        setTimeout(
+          () => {
+            copyDeleteKeyButton.textContent =
+              "コピー";
+          },
+          1500
+        );
+      }
+    }
+  );
+
+
+  document.querySelectorAll(
+    "[data-close-modal]"
+  ).forEach(
+    button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          closeModal(
+            button.dataset.closeModal
+          );
+        }
+      );
+    }
+  );
+
+
+  document.querySelectorAll(
+    ".modal-backdrop"
+  ).forEach(
+    backdrop => {
+
+      backdrop.addEventListener(
+        "click",
+        function () {
+
+          const modal =
+            this.parentElement;
+
+          modal.classList.add(
+            "hidden"
+          );
+        }
+      );
+    }
+  );
+
+
+  document.addEventListener(
+    "keydown",
+    function (event) {
+
+      if (
+        event.key ===
+        "Escape"
+      ) {
+
+        closeAllModals();
+      }
+    }
+  );
+}
+
+
+/* =========================================================
+   Error
+========================================================= */
+
+function getErrorMessage(
+  error
+) {
+
+  if (!error) {
+    return "不明なエラーです。";
+  }
+
+  if (
+    typeof error ===
+    "string"
+  ) {
+
+    return error;
+  }
+
+  if (
+    error.message
+  ) {
+
+    return error.message;
+  }
+
+  if (
+    error.error_description
+  ) {
+
+    return error.error_description;
+  }
+
+  try {
+
+    return JSON.stringify(
+      error
+    );
+
+  } catch {
+
+    return "不明なエラーです。";
+  }
+}
+
+
+/* =========================================================
+   Initialization
+========================================================= */
+
+function initialize() {
+
+  console.log(
+    "FileBox starting..."
+  );
+
+
+  /* DOM */
+
+  fileInput =
+    $("fileInput");
+
+  dropZone =
+    $("dropZone");
+
+  dropIcon =
+    $("dropIcon");
+
+  dropTitle =
+    $("dropTitle");
+
+  dropDescription =
+    $("dropDescription");
+
+  selectedFile =
+    $("selectedFile");
+
+  fileName =
+    $("fileName");
+
+  fileSize =
+    $("fileSize");
+
+  clearFileButton =
+    $("clearFileButton");
+
+  uploadPassword =
+    $("uploadPassword");
+
+  togglePassword =
+    $("togglePassword");
+
+  uploadButton =
+    $("uploadButton");
+
+  progressArea =
+    $("progressArea");
+
+  progressText =
+    $("progressText");
+
+  progressPercent =
+    $("progressPercent");
+
+  progressValue =
+    $("progressValue");
+
+  deleteKeyBox =
+    $("deleteKeyBox");
+
+  deleteKeyText =
+    $("deleteKeyText");
+
+  copyDeleteKeyButton =
+    $("copyDeleteKeyButton");
+
+  reloadButton =
+    $("reloadButton");
+
+  searchInput =
+    $("searchInput");
+
+  searchClear =
+    $("searchClear");
+
+  fileCount =
+    $("fileCount");
+
+  fileList =
+    $("fileList");
+
+  pagination =
+    $("pagination");
+
+  passwordModal =
+    $("passwordModal");
+
+  passwordModalFileName =
+    $("passwordModalFileName");
+
+  accessPassword =
+    $("accessPassword");
+
+  passwordError =
+    $("passwordError");
+
+  passwordSubmit =
+    $("passwordSubmit");
+
+  deleteModal =
+    $("deleteModal");
+
+  deleteModalFileName =
+    $("deleteModalFileName");
+
+  deleteKeyInput =
+    $("deleteKeyInput");
+
+  deleteError =
+    $("deleteError");
+
+  deleteSubmit =
+    $("deleteSubmit");
+
+  urlModal =
+    $("urlModal");
+
+  urlText =
+    $("urlText");
+
+  copyUrlButton =
+    $("copyUrlButton");
+
+  loadingModal =
+    $("loadingModal");
+
+  loadingText =
+    $("loadingText");
+
+
+  /* DOMチェック */
+
+  const requiredElements = [
+
+    ["fileInput", fileInput],
+    ["dropZone", dropZone],
+    ["uploadButton", uploadButton],
+    ["fileList", fileList],
+    ["searchInput", searchInput],
+    ["passwordModal", passwordModal],
+    ["deleteModal", deleteModal],
+    ["urlModal", urlModal]
+
+  ];
+
+
+  const missing =
+    requiredElements
+      .filter(
+        item => !item[1]
+      )
+      .map(
+        item => item[0]
+      );
+
+
+  if (
+    missing.length > 0
+  ) {
+
+    console.error(
+      "Missing DOM elements:",
+      missing
+    );
+
+    alert(
+      "FileBoxのHTMLに必要な要素がありません。\n\n不足: " +
+      missing.join(", ")
+    );
+
+    return;
+  }
+
+
+  /* Supabase */
+
+  const initialized =
+    initSupabase();
+
+
+  if (!initialized) {
+
+    console.error(
+      "Supabase initialization failed."
+    );
+
+    fileList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+
+        <strong>
+          Supabaseに接続できません
+        </strong>
+
+        <p>
+          script.jsのSupabase設定を確認してください。
+        </p>
+      </div>
+    `;
+
+    return;
+  }
+
+
+  /* Events */
+
+  setupFileSelection();
+
+  setupPasswordToggle();
+
+  setupEvents();
+
+
+  /* Files */
+
+  loadFiles();
+
+
+  console.log(
+    "FileBox initialized successfully."
+  );
+}
+
+
+/* =========================================================
+   Start
+========================================================= */
+
+if (
+  document.readyState ===
+  "loading"
+) {
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    initialize
+  );
+
+} else {
+
+  initialize();
+}
