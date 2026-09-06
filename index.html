@@ -3,23 +3,31 @@
 
 <head>
 
-<meta charset="UTF-8">
+  <meta charset="UTF-8">
 
-<meta
-  name="viewport"
-  content="width=device-width,initial-scale=1"
->
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
-<title>FileBox</title>
+  <meta
+    name="description"
+    content="FileBox - ファイルを匿名でアップロードして共有できるサイト"
+  >
 
-<link
-  rel="stylesheet"
-  href="style.css"
->
+  <title>FileBox</title>
+
+  <link rel="stylesheet" href="style.css">
 
 </head>
 
+
 <body>
+
+
+<!-- =========================
+     ヘッダー
+========================= -->
 
 <header>
 
@@ -27,27 +35,29 @@
 
     <div
       class="logo"
-      onclick="location.reload()"
+      id="logo"
+      title="FileBox"
     >
-      📦 FileBox
+
+      <div class="logo-icon">
+        📦
+      </div>
+
+      <span>
+        FileBox
+      </span>
+
     </div>
+
 
     <div class="header-actions">
 
       <button
-        id="refreshButton"
-        class="header-button"
         type="button"
-        title="更新"
-      >
-        ↻
-      </button>
-
-      <button
-        id="darkModeButton"
         class="header-button"
-        type="button"
-        title="ダークモード"
+        id="themeButton"
+        title="ダークモード切替"
+        aria-label="ダークモード切替"
       >
         🌙
       </button>
@@ -59,39 +69,49 @@
 </header>
 
 
+
+<!-- =========================
+     メイン
+========================= -->
+
 <main>
 
 
   <!-- =========================
-       説明
-  ========================== -->
+       イントロ
+  ========================= -->
 
   <section class="intro">
 
     <h1>
-      ファイル共有
+      ファイルをかんたん共有
     </h1>
 
     <p>
-      ファイルをアップロードして、
-      別の端末からダウンロードできます。
+      ファイルをアップロードして、別のデバイスからダウンロードできます。
     </p>
+
 
     <div class="notice">
 
       <strong>
-        🔐 パスワードについて
+        🔐 FileBoxの使い方
       </strong>
 
       <p>
-        ダウンロードには設定した
-        ダウンロードパスワードが必要です。
+        ① ファイルを選択
+        → ② パスワードを設定
+        → ③ アップロード
       </p>
 
       <p>
-        削除には別の「削除キー」が必要です。
-        ダウンロードパスワードを他人に教えても、
-        その人はファイルを削除できません。
+        アップロードしたファイルは一覧に表示されます。
+        ダウンロードするには設定したパスワードが必要です。
+      </p>
+
+      <p>
+        削除キーはファイルを削除するときに必要になるので、
+        大切に保管してください。
       </p>
 
     </div>
@@ -99,11 +119,26 @@
   </section>
 
 
+
+  <!-- =========================
+       メッセージ
+  ========================= -->
+
+  <div
+    id="message"
+    class="message hidden"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+
+
   <!-- =========================
        アップロード
-  ========================== -->
+  ========================= -->
 
   <section class="upload-card">
+
 
     <div class="section-title">
 
@@ -112,36 +147,60 @@
       </h2>
 
       <span class="limit">
-        最大100MB
+        FileBox
       </span>
 
     </div>
 
 
+
+    <!-- =====================
+         ファイル選択
+    ====================== -->
+
     <div
-      id="dropZone"
+      id="uploadArea"
       class="drop-zone"
     >
 
-      <div class="drop-icon">
+
+      <input
+        type="file"
+        id="fileInput"
+        aria-label="アップロードするファイルを選択"
+      >
+
+
+      <div
+        class="drop-icon"
+        id="dropIcon"
+      >
         📁
       </div>
 
-      <div class="drop-title">
-        ファイルを選択
-      </div>
 
-      <div class="drop-description">
-        クリックまたはドラッグ＆ドロップ
-      </div>
-
-      <input
-        id="fileInput"
-        type="file"
+      <div
+        class="drop-title"
+        id="dropTitle"
       >
+        ファイルを選択してください
+      </div>
+
+
+      <div
+        class="drop-description"
+        id="dropDescription"
+      >
+        ここをクリックするか、ファイルをドラッグ＆ドロップ
+      </div>
 
     </div>
 
+
+
+    <!-- =====================
+         選択ファイル
+    ====================== -->
 
     <div
       id="selectedFile"
@@ -152,26 +211,30 @@
         📄
       </div>
 
+
       <div class="selected-file-info">
 
         <div
-          id="selectedFileName"
+          id="fileName"
           class="selected-file-name"
         >
+          ファイル未選択
         </div>
 
         <div
-          id="selectedFileSize"
+          id="fileSize"
           class="selected-file-size"
-        >
-        </div>
+        ></div>
 
       </div>
 
+
       <button
+        type="button"
         id="clearFileButton"
         class="small-button"
-        type="button"
+        title="選択を解除"
+        aria-label="選択を解除"
       >
         ✕
       </button>
@@ -179,38 +242,51 @@
     </div>
 
 
+
+    <!-- =====================
+         パスワード
+    ====================== -->
+
     <div class="form-group">
 
       <label for="uploadPassword">
-        🔒 ダウンロードパスワード
+        🔑 ダウンロードパスワード
       </label>
 
       <input
+        type="password"
         id="uploadPassword"
         class="text-input"
-        type="password"
-        minlength="4"
-        maxlength="128"
+        placeholder="パスワードを入力"
         autocomplete="new-password"
-        placeholder="4文字以上"
       >
 
       <p class="input-help">
-        このパスワードを知っている人だけが
-        ダウンロードできます。
+        このパスワードは、ファイルをダウンロードするときに必要です。
       </p>
 
     </div>
 
 
+
+    <!-- =====================
+         アップロードボタン
+    ====================== -->
+
     <button
+      type="button"
       id="uploadButton"
       class="primary-button"
-      type="button"
+      disabled
     >
-      📤 アップロード
+      📤 アップロードする
     </button>
 
+
+
+    <!-- =====================
+         プログレス
+    ====================== -->
 
     <div
       id="progressArea"
@@ -219,7 +295,7 @@
 
       <div class="progress-header">
 
-        <span>
+        <span id="progressText">
           アップロード中...
         </span>
 
@@ -229,10 +305,11 @@
 
       </div>
 
+
       <div class="progress-bar">
 
         <div
-          id="progressBar"
+          id="progressValue"
           class="progress-value"
         ></div>
 
@@ -240,22 +317,14 @@
 
     </div>
 
+
   </section>
 
-
-  <!-- =========================
-       メッセージ
-  ========================== -->
-
-  <div
-    id="message"
-    class="message hidden"
-  ></div>
 
 
   <!-- =========================
        削除キー
-  ========================== -->
+  ========================= -->
 
   <section
     id="deleteKeyBox"
@@ -263,48 +332,52 @@
   >
 
     <div class="delete-key-title">
-      🔑 削除キーが発行されました
+      🔐 ファイル削除キー
     </div>
 
     <p>
-      このファイルを削除するときに必要です。
-      <strong>このキーをなくすと削除できなくなるので、
-      必ず保存してください。</strong>
+      このキーを使うと、アップロードしたファイルを
+      一覧から削除できます。
     </p>
 
     <div class="delete-key-row">
 
-      <code id="deleteKeyDisplay"></code>
+      <code id="deleteKey">
+        -
+      </code>
 
       <button
-        id="copyDeleteKey"
-        class="copy-button"
         type="button"
+        id="copyDeleteKeyButton"
+        class="copy-button"
       >
-        コピー
+        📋 コピー
       </button>
 
     </div>
 
     <div class="delete-key-warning">
-      ⚠️ 削除キーはサイト上では再表示できません。
+      ⚠ このキーは後から確認できない場合があります。
+      必ず安全な場所に保存してください。
     </div>
 
   </section>
 
 
+
   <!-- =========================
        ファイル一覧
-  ========================== -->
+  ========================= -->
 
   <section class="files-section">
+
 
     <div class="files-header">
 
       <div>
 
         <h2>
-          📋 ファイル一覧
+          📁 ファイル一覧
         </h2>
 
         <span
@@ -316,36 +389,43 @@
 
       </div>
 
+
       <button
+        type="button"
         id="reloadButton"
         class="reload-button"
-        type="button"
       >
-        ↻ 更新
+        🔄 更新
       </button>
 
     </div>
 
 
-    <!-- 検索 -->
+
+    <!-- =====================
+         検索
+    ====================== -->
 
     <div class="search-box">
 
       <span class="search-icon">
-        🔎
+        🔍
       </span>
 
       <input
+        type="search"
         id="searchInput"
         class="search-input"
-        type="search"
         placeholder="ファイル名を検索..."
+        autocomplete="off"
       >
 
       <button
-        id="clearSearchButton"
-        class="search-clear hidden"
         type="button"
+        id="searchClear"
+        class="search-clear hidden"
+        title="検索をクリア"
+        aria-label="検索をクリア"
       >
         ✕
       </button>
@@ -353,50 +433,47 @@
     </div>
 
 
-    <div
-      id="loading"
-      class="loading"
-    >
-      読み込み中...
-    </div>
 
-
-    <div
-      id="emptyState"
-      class="empty-state hidden"
-    >
-
-      <div class="empty-icon">
-        📂
-      </div>
-
-      <h3>
-        ファイルがありません
-      </h3>
-
-      <p>
-        最初のファイルをアップロードしてみましょう。
-      </p>
-
-    </div>
-
+    <!-- =====================
+         ファイル一覧本体
+    ====================== -->
 
     <div
       id="fileList"
       class="file-list"
+    >
+
+      <div class="loading">
+        ファイル一覧を読み込んでいます...
+      </div>
+
+    </div>
+
+
+
+    <!-- =====================
+         ページネーション
+    ====================== -->
+
+    <div
+      id="pagination"
+      class="pagination"
     ></div>
 
+
   </section>
+
 
 </main>
 
 
+
 <!-- =========================
-     削除キー入力モーダル
-========================== -->
+     ローディング
+========================= -->
 
 <div
-  id="deleteModal"
+  id="loading"
   class="modal hidden"
 >
 
@@ -404,54 +481,180 @@
 
   <div class="modal-box">
 
+    <div class="modal-icon">
+      ⏳
+    </div>
+
+    <h2>
+      処理中...
+    </h2>
+
+    <p>
+      しばらくお待ちください。
+    </p>
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================
+     パスワードモーダル
+========================= -->
+
+<div
+  id="passwordModal"
+  class="modal hidden"
+>
+
+  <div
+    class="modal-backdrop"
+    id="passwordModalBackdrop"
+  ></div>
+
+
+  <div class="modal-box">
+
     <button
-      id="closeDeleteModal"
-      class="modal-close"
       type="button"
+      class="modal-close"
+      id="passwordModalClose"
+      aria-label="閉じる"
     >
       ✕
     </button>
+
+
+    <div class="modal-icon">
+      🔐
+    </div>
+
+
+    <h2>
+      パスワードを入力
+    </h2>
+
+
+    <p>
+      このファイルを利用するには
+      設定されたパスワードが必要です。
+    </p>
+
+
+    <input
+      type="password"
+      id="modalPassword"
+      class="text-input"
+      placeholder="パスワード"
+      autocomplete="off"
+    >
+
+
+    <div
+      id="modalError"
+      class="modal-error hidden"
+    ></div>
+
+
+    <div class="modal-buttons">
+
+      <button
+        type="button"
+        id="modalCancelButton"
+        class="secondary-button"
+      >
+        キャンセル
+      </button>
+
+      <button
+        type="button"
+        id="modalSubmitButton"
+        class="primary-button"
+      >
+        確認
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================
+     削除確認モーダル
+========================= -->
+
+<div
+  id="deleteModal"
+  class="modal hidden"
+>
+
+  <div
+    class="modal-backdrop"
+    id="deleteModalBackdrop"
+  ></div>
+
+
+  <div class="modal-box">
+
+    <button
+      type="button"
+      class="modal-close"
+      id="deleteModalClose"
+      aria-label="閉じる"
+    >
+      ✕
+    </button>
+
 
     <div class="modal-icon">
       🗑️
     </div>
 
+
     <h2>
       ファイルを削除
     </h2>
 
+
     <p>
-      アップロード時に発行された
-      <strong>削除キー</strong>を入力してください。
+      このファイルを削除しますか？
+      削除すると元に戻せません。
     </p>
 
+
     <input
+      type="password"
       id="deleteKeyInput"
       class="text-input"
-      type="password"
+      placeholder="削除キーを入力"
       autocomplete="off"
-      placeholder="削除キー"
     >
+
 
     <div
       id="deleteModalError"
       class="modal-error hidden"
     ></div>
 
+
     <div class="modal-buttons">
 
       <button
-        id="cancelDeleteButton"
-        class="secondary-button"
         type="button"
+        id="deleteCancelButton"
+        class="secondary-button"
       >
         キャンセル
       </button>
 
       <button
-        id="confirmDeleteButton"
-        class="danger-button"
         type="button"
+        id="deleteConfirmButton"
+        class="danger-button"
       >
         🗑️ 削除する
       </button>
@@ -463,61 +666,84 @@
 </div>
 
 
+
 <!-- =========================
-     削除キー表示モーダル
-========================== -->
+     URL表示モーダル
+========================= -->
 
 <div
-  id="keyModal"
+  id="urlModal"
   class="modal hidden"
 >
 
-  <div class="modal-backdrop"></div>
+  <div
+    class="modal-backdrop"
+    id="urlModalBackdrop"
+  ></div>
 
-  <div class="modal-box key-modal">
+
+  <div class="modal-box">
+
+    <button
+      type="button"
+      class="modal-close"
+      id="urlModalClose"
+      aria-label="閉じる"
+    >
+      ✕
+    </button>
+
 
     <div class="modal-icon">
-      🔑
+      🔗
     </div>
+
 
     <h2>
-      削除キー
+      ダウンロードURL
     </h2>
 
+
     <p>
-      このキーを安全な場所に保存してください。
+      このURLは一定時間で無効になります。
     </p>
 
+
     <div class="large-key">
-      <code id="largeDeleteKey"></code>
+
+      <code id="downloadUrl">
+        -
+      </code>
+
     </div>
 
-    <button
-      id="largeCopyKey"
-      class="primary-button"
-      type="button"
-    >
-      📋 削除キーをコピー
-    </button>
 
-    <button
-      id="closeKeyModal"
-      class="secondary-button full-button"
-      type="button"
-    >
-      閉じる
-    </button>
+    <div class="modal-buttons">
+
+      <button
+        type="button"
+        id="urlCopyButton"
+        class="secondary-button"
+      >
+        📋 URLをコピー
+      </button>
+
+    </div>
 
   </div>
 
 </div>
 
 
-<script
-  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-></script>
+
+<!-- =========================
+     Supabase
+========================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script src="script.js"></script>
 
 </body>
+
 </html>
