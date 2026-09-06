@@ -1,45 +1,26 @@
-/* ==================================================
-   Supabase設定
-================================================== */
-
-// Supabase Dashboardから取得
-const SUPABASE_URL = "https://jlmskpyaftbndqhfqvwq.supabase.co";
-
+const SUPABASE_URL = "https://jlmskpyaftbndqhfqvwq.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_q3H9vNZW28PZVGHebbB72g_brELXdmZ";
-
-
-/* ==================================================
-   設定
-================================================== */
 
 const BUCKET_NAME = "files";
 
-// 1ファイル最大サイズ
-// 100MB
 const MAX_FILE_SIZE = 100 * 1024 * 1024;
 
+const FUNCTION_NAME = "file-access";
 
-/* ==================================================
-   Supabase初期化
-================================================== */
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
-
-
-/* ==================================================
-   DOM
-================================================== */
 
 const fileInput =
   document.getElementById("fileInput");
 
-const dropArea =
-  document.getElementById("dropArea");
+const dropZone =
+  document.getElementById("dropZone");
 
-const selectedFile =
+const selectedFileBox =
   document.getElementById("selectedFile");
 
 const selectedFileName =
@@ -48,17 +29,32 @@ const selectedFileName =
 const selectedFileSize =
   document.getElementById("selectedFileSize");
 
-const uploadBtn =
-  document.getElementById("uploadBtn");
+const uploadPassword =
+  document.getElementById("uploadPassword");
 
-const refreshBtn =
-  document.getElementById("refreshBtn");
+const passwordArea =
+  document.getElementById("passwordArea");
+
+const uploadButton =
+  document.getElementById("uploadButton");
+
+const removeSelectedFile =
+  document.getElementById("removeSelectedFile");
+
+const progressArea =
+  document.getElementById("progressArea");
+
+const progressBar =
+  document.getElementById("progressBar");
+
+const progressText =
+  document.getElementById("progressText");
+
+const message =
+  document.getElementById("message");
 
 const fileList =
   document.getElementById("fileList");
-
-const fileCount =
-  document.getElementById("fileCount");
 
 const loading =
   document.getElementById("loading");
@@ -69,75 +65,105 @@ const empty =
 const searchInput =
   document.getElementById("searchInput");
 
-const message =
-  document.getElementById("message");
+const fileCount =
+  document.getElementById("fileCount");
 
-const progressContainer =
-  document.getElementById("progressContainer");
-
-const progressBar =
-  document.getElementById("progressBar");
-
-const progressText =
-  document.getElementById("progressText");
-
-const fileTemplate =
-  document.getElementById("fileTemplate");
+const refreshButton =
+  document.getElementById("refreshButton");
 
 
-/* ==================================================
-   状態
-================================================== */
-
-let selectedFileObject = null;
-
+let selectedFile = null;
 let allFiles = [];
 
-
-/* ==================================================
-   初期化
-================================================== */
 
 document.addEventListener(
   "DOMContentLoaded",
   () => {
-
     loadFiles();
-
   }
 );
 
-
-/* ==================================================
-   ファイル選択
-================================================== */
 
 fileInput.addEventListener(
   "change",
   () => {
-
-    if (!fileInput.files.length) {
-      return;
+    if (fileInput.files.length > 0) {
+      selectFile(fileInput.files[0]);
     }
-
-    selectFile(fileInput.files[0]);
-
   }
 );
 
 
-/* ==================================================
-   ファイル選択処理
-================================================== */
+dropZone.addEventListener(
+  "dragover",
+  (event) => {
+    event.preventDefault();
+
+    dropZone.classList.add("dragover");
+  }
+);
+
+
+dropZone.addEventListener(
+  "dragleave",
+  () => {
+    dropZone.classList.remove("dragover");
+  }
+);
+
+
+dropZone.addEventListener(
+  "drop",
+  (event) => {
+    event.preventDefault();
+
+    dropZone.classList.remove("dragover");
+
+    const file =
+      event.dataTransfer.files[0];
+
+    if (file) {
+      selectFile(file);
+    }
+  }
+);
+
+
+removeSelectedFile.addEventListener(
+  "click",
+  clearSelectedFile
+);
+
+
+uploadPassword.addEventListener(
+  "input",
+  updateUploadButton
+);
+
+
+uploadButton.addEventListener(
+  "click",
+  uploadSelectedFile
+);
+
+
+refreshButton.addEventListener(
+  "click",
+  loadFiles
+);
+
+
+searchInput.addEventListener(
+  "input",
+  () => {
+    renderFiles(
+      searchInput.value.trim().toLowerCase()
+    );
+  }
+);
+
 
 function selectFile(file) {
-
-  if (!file) {
-    return;
-  }
-
-
-  // サイズチェック
 
   if (file.size > MAX_FILE_SIZE) {
 
@@ -146,216 +172,171 @@ function selectFile(file) {
       "error"
     );
 
-    fileInput.value = "";
-
     return;
   }
 
-
-  selectedFileObject = file;
-
+  selectedFile = file;
 
   selectedFileName.textContent =
     file.name;
 
   selectedFileSize.textContent =
-    formatBytes(file.size);
+    formatSize(file.size);
 
-
-  selectedFile.classList.remove(
+  selectedFileBox.classList.remove(
     "hidden"
   );
 
+  passwordArea.classList.remove(
+    "hidden"
+  );
+
+  updateUploadButton();
+
+  hideMessage();
 }
 
 
-/* ==================================================
-   ドラッグ&ドロップ
-================================================== */
+function clearSelectedFile() {
 
-[
-  "dragenter",
-  "dragover"
-].forEach(eventName => {
+  selectedFile = null;
 
-  dropArea.addEventListener(
-    eventName,
-    event => {
+  fileInput.value = "";
 
-      event.preventDefault();
+  uploadPassword.value = "";
 
-      dropArea.classList.add(
-        "dragover"
-      );
-
-    }
+  selectedFileBox.classList.add(
+    "hidden"
   );
 
-});
-
-
-[
-  "dragleave",
-  "drop"
-].forEach(eventName => {
-
-  dropArea.addEventListener(
-    eventName,
-    event => {
-
-      event.preventDefault();
-
-      dropArea.classList.remove(
-        "dragover"
-      );
-
-    }
+  passwordArea.classList.add(
+    "hidden"
   );
 
-});
+  updateUploadButton();
+}
 
 
-dropArea.addEventListener(
-  "drop",
-  event => {
+function updateUploadButton() {
 
-    const files =
-      event.dataTransfer.files;
+  const valid =
+    selectedFile &&
+    uploadPassword.value.length >= 4;
 
-    if (!files.length) {
-      return;
-    }
+  uploadButton.disabled = !valid;
+}
 
-    selectFile(files[0]);
 
+async function uploadSelectedFile() {
+
+  if (!selectedFile) {
+    return;
   }
-);
 
+  const password =
+    uploadPassword.value;
 
-/* ==================================================
-   アップロード
-================================================== */
-
-uploadBtn.addEventListener(
-  "click",
-  uploadFile
-);
-
-
-async function uploadFile() {
-
-  if (!selectedFileObject) {
+  if (password.length < 4) {
 
     showMessage(
-      "ファイルを選択してください。",
+      "パスワードは4文字以上にしてください。",
       "error"
     );
 
     return;
   }
 
+  uploadButton.disabled = true;
 
-  const file =
-    selectedFileObject;
-
-
-  // ボタン停止
-
-  uploadBtn.disabled = true;
-
-  uploadBtn.textContent =
-    "アップロード中...";
-
-
-  progressContainer.classList.remove(
+  progressArea.classList.remove(
     "hidden"
   );
 
   setProgress(5);
 
+  hideMessage();
 
   try {
 
     /*
-      同じファイル名でも衝突しないように
-      ランダムIDを付ける
+      パスワード用のランダムなsalt
+    */
+
+    const saltBytes =
+      crypto.getRandomValues(
+        new Uint8Array(16)
+      );
+
+    const salt =
+      bytesToBase64(saltBytes);
+
+
+    setProgress(15);
+
+
+    /*
+      PBKDF2でパスワードをハッシュ化
+    */
+
+    const passwordHash =
+      await hashPassword(
+        password,
+        salt
+      );
+
+
+    setProgress(25);
+
+
+    /*
+      Storage上のファイル名
     */
 
     const randomId =
       crypto.randomUUID();
 
-
     const safeName =
-      sanitizeFileName(file.name);
+      sanitizeFileName(
+        selectedFile.name
+      );
 
-
-    const path =
+    const storagePath =
       `${randomId}_${safeName}`;
 
 
-    setProgress(20);
-
-
     /*
-      Supabase Storageへアップロード
-
-      upsert:false にして、
-      既存ファイルを上書きしない
+      Storageへアップロード
     */
 
     const {
-      data,
-      error
-    } = await supabaseClient
-      .storage
-      .from(BUCKET_NAME)
-      .upload(
-        path,
-        file,
-        {
-          cacheControl: "3600",
-          contentType:
-            file.type ||
-            "application/octet-stream",
-          upsert: false
-        }
-      );
+      error: uploadError
+    } =
+      await supabaseClient
+        .storage
+        .from(BUCKET_NAME)
+        .upload(
+          storagePath,
+          selectedFile,
+          {
+            cacheControl: "3600",
+            contentType:
+              selectedFile.type ||
+              "application/octet-stream",
+            upsert: false
+          }
+        );
 
 
-    if (error) {
-
-      console.error(error);
-
-      throw error;
-
+    if (uploadError) {
+      throw uploadError;
     }
 
 
-    setProgress(75);
+    setProgress(70);
 
 
     /*
-      公開URLを取得
-    */
-
-    const {
-      data: publicData
-    } =
-      supabaseClient
-        .storage
-        .from(BUCKET_NAME)
-        .getPublicUrl(path);
-
-
-    const publicUrl =
-      publicData.publicUrl;
-
-
-    setProgress(90);
-
-
-    /*
-      ファイル情報をDatabaseへ保存
+      Databaseへ保存
     */
 
     const {
@@ -364,38 +345,29 @@ async function uploadFile() {
       await supabaseClient
         .from("files")
         .insert({
-
-          name: file.name,
-
-          storage_path: path,
-
-          size: file.size,
-
+          name: selectedFile.name,
+          storage_path: storagePath,
+          size: selectedFile.size,
           mime_type:
-            file.type ||
+            selectedFile.type ||
             "application/octet-stream",
-
-          public_url: publicUrl
-
+          public_url: "",
+          password_salt: salt,
+          password_hash: passwordHash,
+          has_password: true
         });
 
 
     if (dbError) {
 
-      /*
-        DB保存に失敗した場合、
-        Storageに残ったファイルを削除
-      */
-
       await supabaseClient
         .storage
         .from(BUCKET_NAME)
-        .remove([path]);
-
-      console.error(dbError);
+        .remove([
+          storagePath
+        ]);
 
       throw dbError;
-
     }
 
 
@@ -403,61 +375,46 @@ async function uploadFile() {
 
 
     showMessage(
-      "アップロードしました！",
+      "アップロードが完了しました！",
       "success"
     );
 
 
-    // リセット
-
-    resetUpload();
+    clearSelectedFile();
 
 
-    // 一覧更新
+    setTimeout(() => {
+      progressArea.classList.add(
+        "hidden"
+      );
+
+      setProgress(0);
+    }, 1000);
+
 
     await loadFiles();
 
-
   } catch (error) {
 
-    console.error(
-      "Upload error:",
-      error
-    );
-
+    console.error(error);
 
     showMessage(
       getErrorMessage(error),
       "error"
     );
 
+    progressArea.classList.add(
+      "hidden"
+    );
+
+    setProgress(0);
 
   } finally {
 
-    uploadBtn.disabled = false;
-
-    uploadBtn.textContent =
-      "アップロード";
-
-
-    setTimeout(() => {
-
-      progressContainer.classList.add(
-        "hidden"
-      );
-
-      setProgress(0);
-
-    }, 800);
-
+    updateUploadButton();
   }
-
 }
 
-
-/* ==================================================
-   ファイル一覧取得
-================================================== */
 
 async function loadFiles() {
 
@@ -480,7 +437,9 @@ async function loadFiles() {
     } =
       await supabaseClient
         .from("files")
-        .select("*")
+        .select(
+          "id,name,size,mime_type,storage_path,created_at,has_password"
+        )
         .order(
           "created_at",
           {
@@ -496,20 +455,22 @@ async function loadFiles() {
 
     allFiles = data || [];
 
+    fileCount.textContent =
+      allFiles.length;
 
-    renderFiles(allFiles);
 
+    renderFiles(
+      searchInput.value
+        .trim()
+        .toLowerCase()
+    );
 
   } catch (error) {
 
-    console.error(
-      "Load files error:",
-      error
-    );
-
+    console.error(error);
 
     showMessage(
-      getErrorMessage(error),
+      "ファイル一覧の読み込みに失敗しました。",
       "error"
     );
 
@@ -518,26 +479,25 @@ async function loadFiles() {
     loading.classList.add(
       "hidden"
     );
-
   }
-
 }
 
 
-/* ==================================================
-   ファイル表示
-================================================== */
-
-function renderFiles(files) {
+function renderFiles(keyword = "") {
 
   fileList.innerHTML = "";
 
 
-  fileCount.textContent =
-    `${files.length}個のファイル`;
+  const filtered =
+    allFiles.filter(
+      (file) =>
+        file.name
+          .toLowerCase()
+          .includes(keyword)
+    );
 
 
-  if (!files.length) {
+  if (filtered.length === 0) {
 
     empty.classList.remove(
       "hidden"
@@ -552,270 +512,599 @@ function renderFiles(files) {
   );
 
 
-  files.forEach(file => {
-
-    const element =
-      fileTemplate.content
-        .cloneNode(true);
-
-
-    const fileName =
-      element.querySelector(
-        ".file-name"
+  filtered.forEach(
+    (file) => {
+      fileList.appendChild(
+        createFileCard(file)
       );
-
-    const fileSize =
-      element.querySelector(
-        ".file-size"
-      );
-
-    const fileDate =
-      element.querySelector(
-        ".file-date"
-      );
-
-    const downloadBtn =
-      element.querySelector(
-        ".download-btn"
-      );
-
-    const copyBtn =
-      element.querySelector(
-        ".copy-btn"
-      );
+    }
+  );
+}
 
 
-    fileName.textContent =
-      file.name;
+function createFileCard(file) {
+
+  const template =
+    document.getElementById(
+      "fileTemplate"
+    );
+
+  const card =
+    template.content
+      .firstElementChild
+      .cloneNode(true);
 
 
-    fileSize.textContent =
-      formatBytes(file.size);
+  const fileName =
+    card.querySelector(
+      ".file-name"
+    );
+
+  const fileSize =
+    card.querySelector(
+      ".file-size"
+    );
+
+  const fileDate =
+    card.querySelector(
+      ".file-date"
+    );
+
+  const fileIcon =
+    card.querySelector(
+      ".file-icon"
+    );
+
+  const passwordInput =
+    card.querySelector(
+      ".file-password"
+    );
+
+  const authButton =
+    card.querySelector(
+      ".auth-button"
+    );
+
+  const authMessage =
+    card.querySelector(
+      ".auth-message"
+    );
+
+  const actions =
+    card.querySelector(
+      ".file-actions"
+    );
+
+  const downloadButton =
+    card.querySelector(
+      ".download-button"
+    );
+
+  const copyButton =
+    card.querySelector(
+      ".copy-button"
+    );
+
+  const deleteButton =
+    card.querySelector(
+      ".delete-button"
+    );
 
 
-    fileDate.textContent =
-      formatDate(file.created_at);
+  fileName.textContent =
+    file.name;
+
+  fileSize.textContent =
+    formatSize(file.size);
+
+  fileDate.textContent =
+    formatDate(file.created_at);
+
+  fileIcon.textContent =
+    getFileIcon(
+      file.mime_type,
+      file.name
+    );
 
 
-    downloadBtn.href =
-      file.public_url;
+  let verified = false;
+  let signedUrl = null;
+  let currentPassword = null;
 
 
-    downloadBtn.download =
-      file.name;
+  authButton.addEventListener(
+    "click",
+    async () => {
+
+      const password =
+        passwordInput.value;
 
 
-    copyBtn.addEventListener(
-      "click",
-      async () => {
+      if (password.length < 4) {
 
-        await copyUrl(
-          file.public_url,
-          copyBtn
+        setAuthMessage(
+          authMessage,
+          "パスワードを入力してください。",
+          "error"
         );
 
+        return;
+      }
+
+
+      authButton.disabled = true;
+
+      authButton.textContent =
+        "確認中...";
+
+
+      try {
+
+        const result =
+          await callFunction({
+            action: "download",
+            fileId: file.id,
+            password
+          });
+
+
+        verified = true;
+
+        currentPassword =
+          password;
+
+        signedUrl =
+          result.url;
+
+
+        actions.classList.remove(
+          "hidden"
+        );
+
+
+        setAuthMessage(
+          authMessage,
+          "✓ 認証成功！ボタンが表示されました。",
+          "success"
+        );
+
+
+        passwordInput.disabled =
+          true;
+
+        authButton.classList.add(
+          "hidden"
+        );
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        verified = false;
+
+        signedUrl = null;
+
+        setAuthMessage(
+          authMessage,
+          error.message ||
+            "パスワードが違います。",
+          "error"
+        );
+
+      } finally {
+
+        authButton.disabled =
+          false;
+
+        authButton.textContent =
+          "認証";
+      }
+    }
+  );
+
+
+  downloadButton.addEventListener(
+    "click",
+    async () => {
+
+      if (!verified) {
+        return;
+      }
+
+
+      try {
+
+        if (!signedUrl) {
+
+          const result =
+            await callFunction({
+              action: "download",
+              fileId: file.id,
+              password: currentPassword
+            });
+
+          signedUrl =
+            result.url;
+        }
+
+
+        /*
+          直接URLを開くのではなく、
+          fetch → Blob → download
+          にすることで画像なども
+          ダウンロードさせる
+        */
+
+        await downloadFile(
+          signedUrl,
+          file.name
+        );
+
+      } catch (error) {
+
+        console.error(error);
+
+        setAuthMessage(
+          authMessage,
+          "ダウンロードに失敗しました。",
+          "error"
+        );
+      }
+    }
+  );
+
+
+  copyButton.addEventListener(
+    "click",
+    async () => {
+
+      if (!verified) {
+        return;
+      }
+
+
+      try {
+
+        const result =
+          await callFunction({
+            action: "url",
+            fileId: file.id,
+            password: currentPassword
+          });
+
+
+        signedUrl =
+          result.url;
+
+
+        await navigator.clipboard.writeText(
+          signedUrl
+        );
+
+
+        setAuthMessage(
+          authMessage,
+          "✓ 期限付きダウンロードURLをコピーしました。",
+          "success"
+        );
+
+      } catch (error) {
+
+        console.error(error);
+
+        setAuthMessage(
+          authMessage,
+          "URLのコピーに失敗しました。",
+          "error"
+        );
+      }
+    }
+  );
+
+
+  deleteButton.addEventListener(
+    "click",
+    async () => {
+
+      if (!verified) {
+        return;
+      }
+
+
+      const confirmed =
+        confirm(
+          `「${file.name}」を削除しますか？\n\nこの操作は元に戻せません。`
+        );
+
+
+      if (!confirmed) {
+        return;
+      }
+
+
+      deleteButton.disabled =
+        true;
+
+      deleteButton.textContent =
+        "削除中...";
+
+
+      try {
+
+        await callFunction({
+          action: "delete",
+          fileId: file.id,
+          password: currentPassword
+        });
+
+
+        card.remove();
+
+
+        allFiles =
+          allFiles.filter(
+            (item) =>
+              item.id !== file.id
+          );
+
+
+        fileCount.textContent =
+          allFiles.length;
+
+
+        if (allFiles.length === 0) {
+          empty.classList.remove(
+            "hidden"
+          );
+        }
+
+      } catch (error) {
+
+        console.error(error);
+
+        setAuthMessage(
+          authMessage,
+          error.message ||
+            "削除に失敗しました。",
+          "error"
+        );
+
+        deleteButton.disabled =
+          false;
+
+        deleteButton.textContent =
+          "🗑️ 削除";
+      }
+    }
+  );
+
+
+  return card;
+}
+
+
+async function callFunction(body) {
+
+  const url =
+    `${SUPABASE_URL}/functions/v1/${FUNCTION_NAME}`;
+
+
+  const response =
+    await fetch(
+      url,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          "apikey":
+            SUPABASE_KEY
+        },
+
+        body:
+          JSON.stringify(body)
       }
     );
 
 
-    fileList.appendChild(
-      element
-    );
-
-  });
-
-}
-
-
-/* ==================================================
-   検索
-================================================== */
-
-searchInput.addEventListener(
-  "input",
-  () => {
-
-    const keyword =
-      searchInput.value
-        .trim()
-        .toLowerCase();
-
-
-    if (!keyword) {
-
-      renderFiles(allFiles);
-
-      return;
-
-    }
-
-
-    const filtered =
-      allFiles.filter(file =>
-
-        file.name
-          .toLowerCase()
-          .includes(keyword)
-
-      );
-
-
-    renderFiles(filtered);
-
-  }
-);
-
-
-/* ==================================================
-   URLコピー
-================================================== */
-
-async function copyUrl(
-  url,
-  button
-) {
+  let data;
 
   try {
-
-    await navigator.clipboard.writeText(
-      url
-    );
-
-
-    const original =
-      button.textContent;
-
-
-    button.textContent =
-      "✓ コピーしました";
-
-
-    setTimeout(() => {
-
-      button.textContent =
-        original;
-
-    }, 1500);
-
-
-  } catch (error) {
-
-    console.error(error);
-
-
-    showMessage(
-      "URLのコピーに失敗しました。",
-      "error"
-    );
-
+    data =
+      await response.json();
+  } catch {
+    data = {};
   }
 
-}
 
+  if (!response.ok) {
 
-/* ==================================================
-   更新
-================================================== */
-
-refreshBtn.addEventListener(
-  "click",
-  async () => {
-
-    refreshBtn.disabled = true;
-
-    refreshBtn.textContent =
-      "更新中...";
-
-
-    await loadFiles();
-
-
-    refreshBtn.disabled = false;
-
-    refreshBtn.textContent =
-      "↻ 更新";
-
-  }
-);
-
-
-/* ==================================================
-   アップロードリセット
-================================================== */
-
-function resetUpload() {
-
-  selectedFileObject = null;
-
-  fileInput.value = "";
-
-  selectedFile.classList.add(
-    "hidden"
-  );
-
-}
-
-
-/* ==================================================
-   進捗
-================================================== */
-
-function setProgress(value) {
-
-  const safe =
-    Math.max(
-      0,
-      Math.min(100, value)
+    throw new Error(
+      data.error ||
+        "処理に失敗しました。"
     );
+  }
 
 
-  progressBar.style.width =
-    `${safe}%`;
+  if (data.error) {
+
+    throw new Error(
+      data.error
+    );
+  }
 
 
-  progressText.textContent =
-    `${safe}%`;
-
+  return data;
 }
 
 
-/* ==================================================
-   ファイル名安全化
-================================================== */
-
-function sanitizeFileName(
-  fileName
+async function downloadFile(
+  url,
+  filename
 ) {
 
-  return fileName
+  const response =
+    await fetch(url);
+
+
+  if (!response.ok) {
+    throw new Error(
+      "ファイルを取得できませんでした。"
+    );
+  }
+
+
+  const blob =
+    await response.blob();
+
+
+  const blobUrl =
+    URL.createObjectURL(blob);
+
+
+  const link =
+    document.createElement("a");
+
+
+  link.href =
+    blobUrl;
+
+  link.download =
+    filename;
+
+  link.style.display =
+    "none";
+
+
+  document.body.appendChild(
+    link
+  );
+
+  link.click();
+
+  link.remove();
+
+
+  setTimeout(
+    () => {
+      URL.revokeObjectURL(
+        blobUrl
+      );
+    },
+    1000
+  );
+}
+
+
+async function hashPassword(
+  password,
+  saltBase64
+) {
+
+  const salt =
+    base64ToBytes(
+      saltBase64
+    );
+
+
+  const encoder =
+    new TextEncoder();
+
+
+  const keyMaterial =
+    await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(password),
+      "PBKDF2",
+      false,
+      ["deriveBits"]
+    );
+
+
+  const derivedBits =
+    await crypto.subtle.deriveBits(
+      {
+        name: "PBKDF2",
+        salt,
+        iterations: 120000,
+        hash: "SHA-256"
+      },
+      keyMaterial,
+      256
+    );
+
+
+  return bytesToBase64(
+    new Uint8Array(
+      derivedBits
+    )
+  );
+}
+
+
+function base64ToBytes(base64) {
+
+  const binary =
+    atob(base64);
+
+  const bytes =
+    new Uint8Array(
+      binary.length
+    );
+
+
+  for (
+    let i = 0;
+    i < binary.length;
+    i++
+  ) {
+    bytes[i] =
+      binary.charCodeAt(i);
+  }
+
+
+  return bytes;
+}
+
+
+function bytesToBase64(bytes) {
+
+  let binary = "";
+
+
+  for (const byte of bytes) {
+    binary += String.fromCharCode(
+      byte
+    );
+  }
+
+
+  return btoa(binary);
+}
+
+
+function sanitizeFileName(name) {
+
+  return name
     .replace(
-      /[<>:"/\\|?*\x00-\x1F]/g,
+      /[\\/:*?"<>|]/g,
       "_"
     )
     .replace(
       /\s+/g,
-      "_"
+      " "
     )
-    .slice(
-      0,
-      180
-    );
-
+    .trim()
+    .slice(0, 180);
 }
 
 
-/* ==================================================
-   ファイルサイズ
-================================================== */
+function formatSize(bytes) {
 
-function formatBytes(
-  bytes
-) {
-
-  if (
-    bytes === 0 ||
-    !bytes
-  ) {
+  if (!bytes) {
     return "0 B";
   }
 
@@ -824,8 +1113,7 @@ function formatBytes(
     "B",
     "KB",
     "MB",
-    "GB",
-    "TB"
+    "GB"
   ];
 
 
@@ -836,57 +1124,102 @@ function formatBytes(
     );
 
 
-  const value =
-    bytes /
-    Math.pow(
-      1024,
-      index
-    );
-
-
-  return `${value.toFixed(
-    index === 0 ? 0 : 2
-  )} ${units[index]}`;
-
+  return (
+    Math.round(
+      (bytes /
+        Math.pow(
+          1024,
+          index
+        )) *
+        10
+    ) / 10
+  ) +
+    " " +
+    units[index];
 }
 
 
-/* ==================================================
-   日付
-================================================== */
+function formatDate(date) {
 
-function formatDate(
-  date
-) {
-
-  if (!date) {
-    return "-";
-  }
-
-
-  return new Intl.DateTimeFormat(
+  return new Date(
+    date
+  ).toLocaleString(
     "ja-JP",
     {
       year: "numeric",
-      month: "numeric",
-      day: "numeric",
+      month: "2-digit",
+      day: "2-digit",
       hour: "2-digit",
       minute: "2-digit"
     }
-  ).format(
-    new Date(date)
   );
-
 }
 
 
-/* ==================================================
-   メッセージ
-================================================== */
+function getFileIcon(
+  mime,
+  name
+) {
+
+  if (
+    mime &&
+    mime.startsWith("image/")
+  ) {
+    return "🖼️";
+  }
+
+  if (
+    mime &&
+    mime.startsWith("video/")
+  ) {
+    return "🎬";
+  }
+
+  if (
+    mime &&
+    mime.startsWith("audio/")
+  ) {
+    return "🎵";
+  }
+
+  if (
+    mime === "application/pdf"
+  ) {
+    return "📕";
+  }
+
+  if (
+    name.endsWith(".zip") ||
+    name.endsWith(".rar") ||
+    name.endsWith(".7z")
+  ) {
+    return "🗜️";
+  }
+
+  if (
+    name.endsWith(".txt") ||
+    name.endsWith(".md")
+  ) {
+    return "📝";
+  }
+
+  return "📄";
+}
+
+
+function setProgress(value) {
+
+  progressBar.style.width =
+    `${value}%`;
+
+  progressText.textContent =
+    `${value}%`;
+}
+
 
 function showMessage(
   text,
-  type = "info"
+  type
 ) {
 
   message.textContent =
@@ -894,82 +1227,39 @@ function showMessage(
 
   message.className =
     `message ${type}`;
-
-
-  message.classList.remove(
-    "hidden"
-  );
-
-
-  clearTimeout(
-    showMessage.timer
-  );
-
-
-  showMessage.timer =
-    setTimeout(() => {
-
-      message.classList.add(
-        "hidden"
-      );
-
-    }, 5000);
-
 }
 
 
-/* ==================================================
-   エラー
-================================================== */
+function hideMessage() {
 
-function getErrorMessage(
-  error
+  message.textContent = "";
+
+  message.className =
+    "message hidden";
+}
+
+
+function setAuthMessage(
+  element,
+  text,
+  type
 ) {
 
-  if (!error) {
-    return "不明なエラーが発生しました。";
-  }
+  element.textContent =
+    text;
+
+  element.className =
+    `auth-message ${type}`;
+}
 
 
-  console.error(error);
-
-
-  if (
-    error.message
-      ?.toLowerCase()
-      .includes("duplicate")
-  ) {
-
-    return "同じファイルがすでに存在します。";
-
-  }
-
+function getErrorMessage(error) {
 
   if (
-    error.message
-      ?.toLowerCase()
-      .includes("payload")
+    error?.message
   ) {
-
-    return "ファイルサイズが大きすぎます。";
-
+    return error.message;
   }
 
-
-  if (
-    error.message
-      ?.toLowerCase()
-      .includes("row-level")
-  ) {
-
-    return "Supabaseの権限設定を確認してください。";
-
-  }
-
-
-  return (
-    error.message ||
-    "エラーが発生しました。"
-  );
-
+  return "エラーが発生しました。";
 }
