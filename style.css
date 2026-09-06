@@ -1,7 +1,7 @@
-```css
-/* =========================
-   基本
-========================= */
+/* =========================================================
+   FileBox
+   style.css
+========================================================= */
 
 * {
   box-sizing: border-box;
@@ -13,285 +13,253 @@ html {
 
 body {
   margin: 0;
+  min-height: 100vh;
 
   font-family:
-    Arial,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
     "Noto Sans JP",
     sans-serif;
 
-  background: #eef2f5;
-  color: #263238;
+  color: #172033;
 
-  transition:
-    background .2s,
-    color .2s;
+  background:
+    radial-gradient(
+      circle at 10% 0%,
+      rgba(90, 130, 255, 0.16),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(120, 200, 255, 0.14),
+      transparent 35%
+    ),
+    #f4f7fc;
 }
+
+
+/* =========================================================
+   共通
+========================================================= */
 
 button,
 input {
-  font-family: inherit;
+  font: inherit;
 }
 
 button {
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
 
-/* =========================
+
+/* =========================================================
    ヘッダー
-========================= */
+========================================================= */
 
 header {
-  position: sticky;
-
-  top: 0;
-
-  z-index: 1000;
+  width: 100%;
 
   background:
     linear-gradient(
-      #63b5df,
-      #4298c5
+      135deg,
+      #315ce7,
+      #4778f5
     );
 
-  border-bottom:
-    2px solid #28769f;
+  color: white;
 
   box-shadow:
-    0 2px 8px
-    rgba(0,0,0,.18);
+    0 8px 30px rgba(38, 74, 170, 0.22);
 }
 
 .header-inner {
-  max-width: 1000px;
-
+  width: min(1100px, calc(100% - 32px));
   margin: auto;
 
-  padding:
-    10px 14px;
+  padding: 24px 0;
 
   display: flex;
-
   align-items: center;
-
-  justify-content:
-    space-between;
+  justify-content: space-between;
+  gap: 20px;
 }
 
 .logo {
-  color: white;
-
-  font-size: 21px;
-
-  font-weight: bold;
-
-  cursor: pointer;
-
-  user-select: none;
-}
-
-.header-actions {
   display: flex;
+  align-items: center;
+  gap: 12px;
 
-  gap: 6px;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
-.header-button {
-  width: 38px;
-  height: 36px;
+.logo-icon {
+  width: 44px;
+  height: 44px;
 
-  border:
-    1px solid #286b8e;
+  display: grid;
+  place-items: center;
 
-  border-radius: 6px;
+  border-radius: 13px;
 
-  background: white;
+  background: rgba(255, 255, 255, 0.18);
 
-  font-size: 17px;
+  font-size: 24px;
 
-  transition:
-    background .15s,
-    transform .1s;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.25);
 }
 
-.header-button:hover {
-  background: #eef8fd;
+.header-description {
+  margin: 4px 0 0;
+
+  color: rgba(255,255,255,.82);
+
+  font-size: 13px;
 }
 
-.header-button:active {
-  transform: translateY(1px);
-}
 
-
-/* =========================
+/* =========================================================
    メイン
-========================= */
+========================================================= */
 
 main {
-  width: 100%;
-
-  max-width: 1000px;
-
-  margin: auto;
-
-  padding:
-    22px 14px 60px;
+  width: min(1100px, calc(100% - 32px));
+  margin: 32px auto 70px;
 }
 
 
-/* =========================
-   説明
-========================= */
-
-.intro {
-  margin-bottom: 18px;
-}
-
-.intro h1 {
-  margin:
-    0 0 7px;
-
-  font-size: 26px;
-}
-
-.intro > p {
-  margin:
-    0 0 15px;
-
-  color: #607078;
-}
-
-.notice {
-  padding: 14px 16px;
-
-  background: #fff;
-
-  border:
-    1px solid #c8d4da;
-
-  border-left:
-    5px solid #4298c5;
-
-  border-radius: 7px;
-
-  box-shadow:
-    0 1px 4px
-    rgba(0,0,0,.05);
-}
-
-.notice strong {
-  display: block;
-
-  margin-bottom: 7px;
-}
-
-.notice p {
-  margin:
-    5px 0;
-
-  font-size: 14px;
-
-  line-height: 1.6;
-
-  color: #56666e;
-}
-
-
-/* =========================
+/* =========================================================
    アップロードカード
-========================= */
+========================================================= */
 
 .upload-card {
-  background: white;
+  background: rgba(255,255,255,.92);
 
-  border:
-    1px solid #c9d4da;
+  border: 1px solid rgba(40,70,130,.08);
 
-  border-radius: 9px;
+  border-radius: 24px;
 
-  padding: 20px;
+  padding: 28px;
 
   box-shadow:
-    0 2px 8px
-    rgba(0,0,0,.07);
-
-  margin-bottom: 20px;
+    0 14px 45px rgba(31, 55, 100, 0.09);
 }
 
 .section-title {
-  display: flex;
+  margin: 0 0 6px;
 
-  align-items: center;
-
-  justify-content:
-    space-between;
-
-  gap: 10px;
-
-  margin-bottom: 15px;
+  font-size: 21px;
+  font-weight: 800;
 }
 
-.section-title h2 {
-  margin: 0;
+.section-description {
+  margin: 0 0 22px;
 
-  font-size: 20px;
-}
+  color: #6d7890;
 
-.limit {
-  padding:
-    4px 8px;
-
-  border-radius: 5px;
-
-  background: #edf6fb;
-
-  color: #31799f;
-
-  font-size: 12px;
-
-  white-space: nowrap;
+  font-size: 14px;
+  line-height: 1.7;
 }
 
 
-/* =========================
-   ドロップゾーン
-========================= */
+/* =========================================================
+   ファイル選択エリア
+========================================================= */
 
-.drop-zone {
+#uploadArea {
   position: relative;
 
-  min-height: 165px;
+  min-height: 190px;
 
-  border:
-    2px dashed #9fb5c0;
+  border: 2px dashed #aab9d8;
 
-  border-radius: 8px;
+  border-radius: 20px;
 
-  background: #f8fbfc;
-
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-
-  justify-content: center;
-
-  text-align: center;
+  background:
+    linear-gradient(
+      180deg,
+      #f8faff,
+      #f3f7ff
+    );
 
   transition:
-    border-color .15s,
-    background .15s;
+    border-color .2s ease,
+    background .2s ease,
+    transform .2s ease,
+    box-shadow .2s ease;
+
+  overflow: hidden;
 }
 
-.drop-zone:hover,
-.drop-zone.dragover {
-  border-color: #3d98c5;
 
-  background: #edf8fd;
+/* ホバー */
+
+#uploadArea:hover {
+  border-color: #4d72ed;
+
+  background:
+    linear-gradient(
+      180deg,
+      #f5f8ff,
+      #edf3ff
+    );
+
+  box-shadow:
+    0 8px 25px rgba(54, 91, 200, .10);
 }
 
-.drop-zone input {
+
+/* ドラッグ中 */
+
+#uploadArea.dragover {
+  border-color: #315ce7;
+
+  background:
+    linear-gradient(
+      180deg,
+      #eaf0ff,
+      #e3ebff
+    );
+
+  transform: scale(1.01);
+
+  box-shadow:
+    0 12px 35px rgba(49, 92, 231, .18);
+}
+
+
+/* ファイル選択済み */
+
+#uploadArea.has-file {
+  border-style: solid;
+
+  border-color: #32a66b;
+
+  background:
+    linear-gradient(
+      135deg,
+      #effcf5,
+      #e8f8f0
+    );
+
+  box-shadow:
+    0 10px 30px rgba(40, 160, 100, .12);
+}
+
+
+/* =========================================================
+   input
+========================================================= */
+
+#fileInput {
   position: absolute;
 
   inset: 0;
@@ -302,625 +270,406 @@ main {
   opacity: 0;
 
   cursor: pointer;
-}
 
-.drop-icon {
-  font-size: 38px;
-
-  margin-bottom: 5px;
-}
-
-.drop-title {
-  font-size: 17px;
-
-  font-weight: bold;
-}
-
-.drop-description {
-  margin-top: 5px;
-
-  color: #73848b;
-
-  font-size: 13px;
+  z-index: 5;
 }
 
 
-/* =========================
-   選択ファイル
-========================= */
+/* =========================================================
+   ファイル選択表示
+========================================================= */
 
-.selected-file {
-  margin-top: 12px;
+.upload-content {
+  position: relative;
+
+  min-height: 190px;
+
+  padding: 28px;
 
   display: flex;
-
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
 
-  gap: 10px;
+  text-align: center;
 
-  padding: 10px 12px;
-
-  border:
-    1px solid #cbd8de;
-
-  border-radius: 6px;
-
-  background: #f7fafb;
+  pointer-events: none;
 }
 
-.selected-file-icon {
-  font-size: 25px;
+.upload-icon {
+  width: 64px;
+  height: 64px;
+
+  display: grid;
+  place-items: center;
+
+  margin-bottom: 13px;
+
+  border-radius: 18px;
+
+  background: #e5ecff;
+
+  color: #3d64df;
+
+  font-size: 31px;
+
+  transition:
+    transform .2s ease,
+    background .2s ease;
 }
 
-.selected-file-info {
-  min-width: 0;
-
-  flex: 1;
+#uploadArea:hover .upload-icon {
+  transform: translateY(-3px);
 }
 
-.selected-file-name {
-  font-weight: bold;
+#uploadArea.has-file .upload-icon {
+  background: #d5f4e3;
+
+  color: #218657;
+
+  font-size: 29px;
+}
+
+.upload-main-text {
+  font-size: 17px;
+  font-weight: 800;
+
+  color: #25324a;
+}
+
+.upload-sub-text {
+  margin-top: 6px;
+
+  font-size: 13px;
+
+  color: #7b879d;
+}
+
+
+/*
+   JSが変更する #fileName
+*/
+
+#fileName {
+  margin-top: 9px;
+
+  max-width: 90%;
 
   overflow: hidden;
 
   text-overflow: ellipsis;
 
   white-space: nowrap;
-}
 
-.selected-file-size {
-  margin-top: 3px;
+  color: #66738a;
 
-  color: #73848b;
-
-  font-size: 12px;
-}
-
-.small-button {
-  width: 31px;
-  height: 31px;
-
-  border:
-    1px solid #b9c6cc;
-
-  border-radius: 5px;
-
-  background: white;
-
-  color: #66757c;
+  font-size: 13px;
 }
 
 
-/* =========================
-   フォーム
-========================= */
+/* 選択済み */
 
-.form-group {
-  margin-top: 18px;
+#uploadArea.has-file #fileName {
+  color: #21794f;
+
+  font-weight: 700;
 }
 
-.form-group label {
+
+/* =========================================================
+   パスワード
+========================================================= */
+
+.upload-password-area {
+  margin-top: 20px;
+}
+
+.input-label {
   display: block;
 
-  margin-bottom: 7px;
-
-  font-weight: bold;
+  margin-bottom: 8px;
 
   font-size: 14px;
+
+  font-weight: 700;
+
+  color: #35415a;
 }
 
-.text-input {
+.password-input-wrapper {
+  position: relative;
+}
+
+#uploadPassword {
   width: 100%;
 
-  height: 42px;
-
-  padding:
-    0 12px;
+  padding: 14px 16px;
 
   border:
-    1px solid #aebdc4;
+    1px solid #d2daea;
 
-  border-radius: 6px;
-
-  background: white;
-
-  color: #263238;
+  border-radius: 13px;
 
   outline: none;
 
-  font-size: 15px;
-
-  transition:
-    border-color .15s,
-    box-shadow .15s;
-}
-
-.text-input:focus {
-  border-color: #3b94c0;
-
-  box-shadow:
-    0 0 0 3px
-    rgba(59,148,192,.12);
-}
-
-.input-help {
-  margin:
-    6px 0 0;
-
-  color: #77878e;
-
-  font-size: 12px;
-
-  line-height: 1.5;
-}
-
-
-/* =========================
-   ボタン
-========================= */
-
-.primary-button {
-  width: 100%;
-
-  min-height: 44px;
-
-  margin-top: 16px;
-
-  border:
-    1px solid #287ba5;
-
-  border-radius: 6px;
-
-  background:
-    linear-gradient(
-      #55abd4,
-      #388ebc
-    );
-
-  color: white;
-
-  font-weight: bold;
-
-  font-size: 15px;
-
-  box-shadow:
-    0 1px 2px
-    rgba(0,0,0,.12);
-}
-
-.primary-button:hover {
-  background:
-    linear-gradient(
-      #63b6dc,
-      #409bc7
-    );
-}
-
-.primary-button:disabled {
-  opacity: .55;
-
-  cursor: not-allowed;
-}
-
-.secondary-button {
-  min-height: 42px;
-
-  padding:
-    0 16px;
-
-  border:
-    1px solid #aebdc4;
-
-  border-radius: 6px;
-
-  background: #fff;
-
-  color: #45555d;
-
-  font-weight: bold;
-}
-
-.secondary-button:hover {
-  background: #f2f5f6;
-}
-
-.full-button {
-  width: 100%;
-
-  margin-top: 9px;
-}
-
-.danger-button {
-  min-height: 42px;
-
-  padding:
-    0 16px;
-
-  border:
-    1px solid #c34b4b;
-
-  border-radius: 6px;
-
-  background: #d9534f;
-
-  color: white;
-
-  font-weight: bold;
-}
-
-.danger-button:hover {
-  background: #c94743;
-}
-
-
-/* =========================
-   プログレス
-========================= */
-
-.progress-area {
-  margin-top: 16px;
-}
-
-.progress-header {
-  display: flex;
-
-  justify-content:
-    space-between;
-
-  margin-bottom: 6px;
-
-  font-size: 13px;
-
-  color: #63737a;
-}
-
-.progress-bar {
-  width: 100%;
-
-  height: 10px;
-
-  overflow: hidden;
-
-  border-radius: 99px;
-
-  background: #dce6ea;
-}
-
-.progress-value {
-  width: 0%;
-
-  height: 100%;
-
-  background: #3c98c5;
-
-  transition:
-    width .12s linear;
-}
-
-
-/* =========================
-   メッセージ
-========================= */
-
-.message {
-  padding:
-    12px 14px;
-
-  margin-bottom: 18px;
-
-  border:
-    1px solid #b9ccd5;
-
-  border-radius: 6px;
-
-  background: #f7fbfd;
-
-  line-height: 1.5;
-
-  font-size: 14px;
-}
-
-.message.success {
-  border-color: #9bc8ad;
-
-  background: #f2faf5;
-
-  color: #28663c;
-}
-
-.message.error {
-  border-color: #e0a6a6;
-
-  background: #fff5f5;
-
-  color: #9a3030;
-}
-
-
-/* =========================
-   削除キー
-========================= */
-
-.delete-key-box {
-  margin-bottom: 20px;
-
-  padding: 17px;
-
-  border:
-    2px solid #e4c46c;
-
-  border-radius: 8px;
-
-  background: #fffbea;
-}
-
-.delete-key-title {
-  font-weight: bold;
-
-  font-size: 17px;
-
-  margin-bottom: 8px;
-}
-
-.delete-key-box p {
-  margin:
-    6px 0 12px;
-
-  line-height: 1.6;
-
-  font-size: 13px;
-}
-
-.delete-key-row {
-  display: flex;
-
-  gap: 7px;
-
-  align-items: stretch;
-}
-
-.delete-key-row code {
-  min-width: 0;
-
-  flex: 1;
-
-  display: flex;
-
-  align-items: center;
-
-  padding:
-    9px 11px;
-
-  overflow-x: auto;
-
-  border:
-    1px solid #d2c48e;
-
-  border-radius: 5px;
-
   background: white;
 
-  color: #564800;
+  color: #172033;
 
-  font-size: 13px;
-
-  word-break: break-all;
+  transition:
+    border-color .2s,
+    box-shadow .2s;
 }
 
-.copy-button {
-  flex-shrink: 0;
+#uploadPassword:focus {
+  border-color: #4a6fee;
 
-  padding:
-    0 13px;
-
-  border:
-    1px solid #a89b63;
-
-  border-radius: 5px;
-
-  background: white;
-
-  color: #51490f;
-
-  font-weight: bold;
+  box-shadow:
+    0 0 0 4px rgba(74,111,238,.10);
 }
 
-.copy-button:hover {
-  background: #f7f1d6;
-}
+.password-help {
+  margin-top: 7px;
 
-.delete-key-warning {
-  margin-top: 10px;
-
-  color: #765f12;
+  color: #7b879d;
 
   font-size: 12px;
 }
 
 
-/* =========================
-   ファイル一覧
-========================= */
+/* =========================================================
+   アップロードボタン
+========================================================= */
+
+.upload-button-area {
+  margin-top: 20px;
+
+  display: flex;
+  justify-content: flex-end;
+}
+
+#uploadButton {
+  min-width: 170px;
+
+  padding: 14px 24px;
+
+  border: 0;
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #315ce7,
+      #4b76f2
+    );
+
+  color: white;
+
+  font-size: 15px;
+
+  font-weight: 800;
+
+  box-shadow:
+    0 7px 20px rgba(49,92,231,.25);
+
+  transition:
+    transform .15s,
+    box-shadow .15s,
+    opacity .15s;
+}
+
+#uploadButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 10px 25px rgba(49,92,231,.32);
+}
+
+#uploadButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+
+/* =========================================================
+   説明
+========================================================= */
+
+.info-box {
+  margin-top: 18px;
+
+  padding: 15px 17px;
+
+  border-radius: 14px;
+
+  background: #f4f7fc;
+
+  border: 1px solid #e1e7f2;
+
+  color: #66738a;
+
+  font-size: 13px;
+
+  line-height: 1.7;
+}
+
+.info-box strong {
+  color: #36435c;
+}
+
+
+/* =========================================================
+   一覧ヘッダー
+========================================================= */
 
 .files-section {
-  margin-top: 22px;
+  margin-top: 34px;
 }
 
 .files-header {
   display: flex;
 
-  align-items: center;
+  align-items: flex-end;
 
-  justify-content:
-    space-between;
+  justify-content: space-between;
 
-  gap: 10px;
+  gap: 15px;
 
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
-.files-header h2 {
-  display: inline;
-
+.files-title {
   margin: 0;
 
-  font-size: 20px;
+  font-size: 21px;
+
+  font-weight: 800;
 }
 
-.file-count {
-  margin-left: 8px;
+.files-count {
+  margin-top: 4px;
 
-  color: #718189;
+  color: #7b879d;
 
   font-size: 13px;
 }
 
-.reload-button {
-  min-height: 36px;
 
-  padding:
-    0 11px;
-
-  border:
-    1px solid #aab9c0;
-
-  border-radius: 5px;
-
-  background: white;
-
-  color: #46575f;
-
-  font-weight: bold;
-}
-
-.reload-button:hover {
-  background: #f1f5f6;
-}
-
-
-/* =========================
+/* =========================================================
    検索
-========================= */
+========================================================= */
 
-.search-box {
-  position: relative;
-
+.search-area {
   display: flex;
 
-  align-items: center;
-
-  margin-bottom: 12px;
+  gap: 9px;
 }
 
-.search-icon {
-  position: absolute;
+#searchInput {
+  width: 260px;
 
-  left: 12px;
-
-  pointer-events: none;
-}
-
-.search-input {
-  width: 100%;
-
-  height: 40px;
-
-  padding:
-    0 40px 0 37px;
+  padding: 11px 14px;
 
   border:
-    1px solid #b6c4ca;
+    1px solid #d3dbea;
 
-  border-radius: 6px;
+  border-radius: 12px;
+
+  background: white;
 
   outline: none;
 
-  background: white;
+  color: #1b263b;
 
-  font-size: 14px;
+  transition:
+    border-color .2s,
+    box-shadow .2s;
 }
 
-.search-input:focus {
-  border-color: #3d98c5;
+#searchInput:focus {
+  border-color: #4a6fee;
 
   box-shadow:
-    0 0 0 3px
-    rgba(61,152,197,.1);
-}
-
-.search-clear {
-  position: absolute;
-
-  right: 6px;
-
-  width: 30px;
-  height: 30px;
-
-  border: 0;
-
-  border-radius: 4px;
-
-  background: transparent;
-
-  color: #6d7c83;
-
-  font-size: 15px;
+    0 0 0 4px rgba(74,111,238,.09);
 }
 
 
-/* =========================
-   ファイルカード
-========================= */
+/* =========================================================
+   ファイル一覧
+========================================================= */
 
-.file-list {
+#fileList {
   display: flex;
 
   flex-direction: column;
 
-  gap: 10px;
+  gap: 12px;
 }
+
+
+/* =========================================================
+   ファイルカード
+========================================================= */
 
 .file-card {
-  background: white;
-
-  border:
-    1px solid #c8d3d8;
-
-  border-radius: 8px;
-
-  padding: 15px;
-
-  box-shadow:
-    0 1px 5px
-    rgba(0,0,0,.05);
-}
-
-.file-top {
-  display: flex;
-
-  align-items: flex-start;
-
-  gap: 11px;
-}
-
-.file-icon {
-  width: 42px;
-  height: 42px;
-
-  flex-shrink: 0;
-
   display: flex;
 
   align-items: center;
 
-  justify-content: center;
+  gap: 17px;
 
-  border-radius: 7px;
+  padding: 18px;
 
-  background: #edf6fb;
+  background: white;
 
-  font-size: 22px;
+  border:
+    1px solid #e3e8f2;
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 5px 18px rgba(34,55,95,.045);
+
+  transition:
+    transform .18s,
+    box-shadow .18s,
+    border-color .18s;
 }
+
+.file-card:hover {
+  transform: translateY(-2px);
+
+  border-color: #ccd6eb;
+
+  box-shadow:
+    0 10px 27px rgba(34,55,95,.08);
+}
+
+
+/* =========================================================
+   アイコン
+========================================================= */
+
+.file-icon {
+  width: 54px;
+  height: 54px;
+
+  flex: 0 0 54px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 15px;
+
+  background: #eef2ff;
+
+  font-size: 26px;
+}
+
+
+/* =========================================================
+   ファイル情報
+========================================================= */
 
 .file-info {
   min-width: 0;
@@ -928,184 +677,296 @@ main {
   flex: 1;
 }
 
-.file-name {
-  font-size: 16px;
+.file-title {
+  overflow: hidden;
 
-  font-weight: bold;
+  text-overflow: ellipsis;
 
-  word-break: break-word;
+  white-space: nowrap;
 
-  line-height: 1.4;
+  font-size: 15px;
+
+  font-weight: 800;
+
+  color: #202b40;
 }
 
 .file-meta {
-  margin-top: 4px;
+  margin-top: 5px;
 
-  color: #718087;
-
-  font-size: 12px;
-
-  line-height: 1.5;
-}
-
-.password-area {
-  display: flex;
-
-  gap: 7px;
-
-  margin-top: 13px;
-}
-
-.password-area .text-input {
-  flex: 1;
-
-  min-width: 0;
-
-  height: 39px;
-}
-
-.auth-button {
-  flex-shrink: 0;
-
-  padding:
-    0 13px;
-
-  border:
-    1px solid #3b89ae;
-
-  border-radius: 5px;
-
-  background: #eaf6fc;
-
-  color: #2d7296;
-
-  font-weight: bold;
-}
-
-.auth-button:hover {
-  background: #dceff8;
-}
-
-.auth-message {
-  min-height: 18px;
-
-  margin-top: 6px;
-
-  font-size: 12px;
-}
-
-.auth-message.error {
-  color: #c23d3d;
-}
-
-.auth-message.success {
-  color: #27814b;
-}
-
-
-/* =========================
-   アクション
-========================= */
-
-.file-actions {
   display: flex;
 
   flex-wrap: wrap;
 
-  gap: 7px;
+  gap: 5px;
 
-  margin-top: 10px;
+  color: #8590a3;
 
-  padding-top: 10px;
-
-  border-top:
-    1px solid #e4eaed;
+  font-size: 12px;
 }
 
-.action-button {
-  min-height: 37px;
+.file-protection {
+  margin-top: 8px;
+}
 
-  padding:
-    0 11px;
+.protected-label {
+  display: inline-flex;
+
+  align-items: center;
+
+  padding: 5px 9px;
+
+  border-radius: 999px;
+
+  background: #fff5dd;
+
+  color: #946817;
+
+  font-size: 11px;
+
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   パスワード入力
+========================================================= */
+
+.password-area {
+  margin-top: 13px;
+
+  display: flex;
+
+  gap: 8px;
+
+  max-width: 430px;
+}
+
+.file-password-input {
+  min-width: 0;
+
+  flex: 1;
+
+  padding: 10px 12px;
 
   border:
-    1px solid #aebdc4;
+    1px solid #d4dceb;
 
-  border-radius: 5px;
+  border-radius: 10px;
 
-  background: white;
+  outline: none;
 
-  color: #44545b;
-
-  font-weight: bold;
-
-  font-size: 13px;
+  background: #fafbfe;
 }
 
-.action-button:hover {
-  background: #f2f5f6;
+.file-password-input:focus {
+  border-color: #4a6fee;
+
+  box-shadow:
+    0 0 0 3px rgba(74,111,238,.09);
 }
 
-.action-button.delete {
-  border-color: #d19b9b;
+.password-button {
+  padding: 10px 14px;
 
-  color: #ad3d3d;
+  border: 0;
+
+  border-radius: 10px;
+
+  background: #315ce7;
+
+  color: white;
+
+  font-weight: 700;
 }
 
-.action-button.delete:hover {
-  background: #fff2f2;
+
+/* =========================================================
+   アクションボタン
+========================================================= */
+
+.file-actions {
+  margin-top: 13px;
+
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 8px;
+}
+
+.file-actions button {
+  padding: 9px 13px;
+
+  border: 0;
+
+  border-radius: 10px;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  transition:
+    transform .15s,
+    opacity .15s;
+}
+
+.file-actions button:hover {
+  transform: translateY(-1px);
+}
+
+.download-button {
+  background: #315ce7;
+
+  color: white;
+}
+
+.url-button {
+  background: #edf1fa;
+
+  color: #34415b;
+}
+
+.delete-button {
+  background: #fff0f0;
+
+  color: #c44747;
 }
 
 
-/* =========================
-   Empty / Loading
-========================= */
-
-.loading {
-  padding: 35px 10px;
-
-  text-align: center;
-
-  color: #728189;
-}
+/* =========================================================
+   Empty
+========================================================= */
 
 .empty-state {
-  padding:
-    45px 15px;
+  padding: 55px 20px;
 
   text-align: center;
 
   background: white;
 
   border:
-    1px solid #cbd6db;
+    1px solid #e3e8f2;
 
-  border-radius: 8px;
+  border-radius: 18px;
+
+  color: #6d7890;
 }
 
 .empty-icon {
+  margin-bottom: 10px;
+
   font-size: 40px;
 }
 
-.empty-state h3 {
-  margin:
-    10px 0 5px;
+.empty-state small {
+  display: block;
+
+  margin-top: 7px;
+
+  color: #9aa4b5;
 }
 
-.empty-state p {
-  margin: 0;
 
-  color: #728189;
+/* =========================================================
+   Pagination
+========================================================= */
+
+#pagination {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 7px;
+
+  margin-top: 23px;
+}
+
+#pagination button {
+  width: 38px;
+  height: 38px;
+
+  border:
+    1px solid #d7deeb;
+
+  border-radius: 10px;
+
+  background: white;
+
+  color: #536078;
+
+  font-weight: 700;
+}
+
+#pagination button:hover:not(:disabled) {
+  border-color: #6b87e9;
+
+  color: #315ce7;
+}
+
+#pagination button.active {
+  border-color: #315ce7;
+
+  background: #315ce7;
+
+  color: white;
+}
+
+
+/* =========================================================
+   Message
+========================================================= */
+
+#message {
+  position: fixed;
+
+  left: 50%;
+
+  bottom: 25px;
+
+  z-index: 1000;
+
+  transform: translateX(-50%);
+
+  max-width:
+    min(500px, calc(100% - 30px));
+
+  padding: 13px 18px;
+
+  border-radius: 13px;
+
+  background: #26334d;
+
+  color: white;
 
   font-size: 13px;
+
+  line-height: 1.5;
+
+  box-shadow:
+    0 10px 35px rgba(0,0,0,.18);
+
+  white-space: pre-line;
+}
+
+#message.success {
+  background: #22885a;
+}
+
+#message.error {
+  background: #c74444;
+}
+
+#message.info {
+  background: #315ce7;
 }
 
 
-/* =========================
-   モーダル
-========================= */
+/* =========================================================
+   Loading
+========================================================= */
 
-.modal {
+#loading {
   position: fixed;
 
   inset: 0;
@@ -1118,315 +979,166 @@ main {
 
   justify-content: center;
 
-  padding: 15px;
-}
-
-.modal-backdrop {
-  position: absolute;
-
-  inset: 0;
-
   background:
-    rgba(0,0,0,.45);
+    rgba(244,247,252,.88);
+
+  backdrop-filter:
+    blur(5px);
+
+  color: #33415c;
+
+  font-size: 15px;
+
+  font-weight: 700;
 }
 
-.modal-box {
-  position: relative;
-
-  z-index: 1;
-
-  width: 100%;
-
-  max-width: 450px;
-
-  padding: 24px;
-
-  border-radius: 9px;
-
-  background: white;
-
-  box-shadow:
-    0 10px 35px
-    rgba(0,0,0,.3);
-}
-
-.modal-close {
-  position: absolute;
-
-  right: 10px;
-  top: 10px;
-
-  width: 32px;
-  height: 32px;
-
-  border: 0;
-
-  border-radius: 5px;
-
-  background: transparent;
-
-  color: #6d777c;
-
-  font-size: 17px;
-}
-
-.modal-icon {
-  text-align: center;
-
-  font-size: 38px;
-
-  margin-bottom: 6px;
-}
-
-.modal-box h2 {
-  margin:
-    0 0 10px;
-
-  text-align: center;
-}
-
-.modal-box > p {
-  margin:
-    0 0 15px;
-
-  color: #64747b;
-
-  font-size: 13px;
-
-  line-height: 1.6;
-
-  text-align: center;
-}
-
-.modal-buttons {
-  display: flex;
-
-  gap: 8px;
-
-  margin-top: 14px;
-}
-
-.modal-buttons button {
-  flex: 1;
-}
-
-.modal-error {
-  margin-top: 8px;
-
-  padding: 8px 10px;
-
-  border-radius: 5px;
-
-  background: #fff0f0;
-
-  color: #b33333;
-
-  font-size: 12px;
-}
-
-.large-key {
-  padding: 14px;
-
-  margin:
-    15px 0;
-
-  border:
-    1px solid #d5c47d;
-
-  border-radius: 6px;
-
-  background: #fffbea;
-
-  overflow-x: auto;
-
-  text-align: center;
-}
-
-.large-key code {
-  color: #554900;
-
-  font-size: 14px;
-
-  word-break: break-all;
-}
-
-
-/* =========================
-   Hidden
-========================= */
-
-.hidden {
+#loading.hidden {
   display: none !important;
 }
 
 
-/* =========================
-   ダークモード
-========================= */
+/* =========================================================
+   フッター
+========================================================= */
 
-body.dark-mode {
-  background: #171b1e;
+footer {
+  padding: 28px 16px 40px;
 
-  color: #e7ecef;
-}
+  text-align: center;
 
-body.dark-mode .intro > p,
-body.dark-mode .file-meta,
-body.dark-mode .input-help,
-body.dark-mode .notice p {
-  color: #aebbc1;
-}
+  color: #929bad;
 
-body.dark-mode .upload-card,
-body.dark-mode .file-card,
-body.dark-mode .empty-state,
-body.dark-mode .notice,
-body.dark-mode .modal-box {
-  background: #252b2f;
-
-  border-color: #4b555b;
-}
-
-body.dark-mode .drop-zone {
-  background: #1d2326;
-
-  border-color: #58666d;
-}
-
-body.dark-mode .drop-zone:hover,
-body.dark-mode .drop-zone.dragover {
-  background: #202d33;
-
-  border-color: #4a9ac2;
-}
-
-body.dark-mode .selected-file {
-  background: #1e2427;
-
-  border-color: #48545a;
-}
-
-body.dark-mode .text-input,
-body.dark-mode .search-input,
-body.dark-mode .header-button,
-body.dark-mode .reload-button,
-body.dark-mode .action-button,
-body.dark-mode .secondary-button,
-body.dark-mode .small-button,
-body.dark-mode .copy-button {
-  background: #1c2124;
-
-  color: #e6ecef;
-
-  border-color: #566168;
-}
-
-body.dark-mode .text-input:focus,
-body.dark-mode .search-input:focus {
-  border-color: #4a9ac2;
-}
-
-body.dark-mode .file-actions {
-  border-color: #40494e;
-}
-
-body.dark-mode .notice {
-  border-left-color: #4b9cc3;
-}
-
-body.dark-mode .limit {
-  background: #1e313b;
-
-  color: #91c8e2;
-}
-
-body.dark-mode .delete-key-box {
-  background: #302d1c;
-
-  border-color: #74652b;
-}
-
-body.dark-mode .delete-key-box code,
-body.dark-mode .large-key {
-  background: #242318;
-
-  border-color: #665d2e;
-
-  color: #eee09c;
-}
-
-body.dark-mode .delete-key-warning {
-  color: #d5c77c;
-}
-
-body.dark-mode .modal-backdrop {
-  background: rgba(0,0,0,.65);
+  font-size: 12px;
 }
 
 
-/* =========================
+/* =========================================================
    スマホ
-========================= */
+========================================================= */
 
-@media (max-width: 600px) {
-
-  main {
-    padding:
-      16px 9px 45px;
-  }
+@media (max-width: 700px) {
 
   .header-inner {
-    padding:
-      8px 9px;
+    width: min(
+      100% - 24px,
+      1100px
+    );
+
+    padding: 18px 0;
   }
 
-  .intro h1 {
-    font-size: 23px;
+  .logo {
+    font-size: 21px;
+  }
+
+  .logo-icon {
+    width: 39px;
+    height: 39px;
+  }
+
+  main {
+    width: calc(100% - 24px);
+
+    margin-top: 20px;
   }
 
   .upload-card {
-    padding: 15px;
+    padding: 18px;
+
+    border-radius: 19px;
   }
 
-  .section-title h2,
-  .files-header h2 {
-    font-size: 18px;
+  #uploadArea {
+    min-height: 170px;
   }
 
-  .drop-zone {
-    min-height: 145px;
+  .upload-content {
+    min-height: 170px;
+
+    padding: 20px;
   }
 
-  .password-area {
-    flex-direction: column;
+  .upload-icon {
+    width: 55px;
+    height: 55px;
+
+    font-size: 27px;
   }
 
-  .auth-button {
-    min-height: 39px;
+  .upload-main-text {
+    font-size: 15px;
   }
 
-  .file-actions {
-    display: grid;
-
-    grid-template-columns:
-      repeat(2, 1fr);
+  .upload-button-area {
+    display: block;
   }
 
-  .action-button {
+  #uploadButton {
     width: 100%;
   }
 
-  .delete-key-row {
+  .files-header {
+    align-items: stretch;
+
     flex-direction: column;
   }
 
-  .copy-button {
-    min-height: 39px;
+  .search-area {
+    width: 100%;
   }
 
-  .modal-box {
-    padding: 20px 16px;
+  #searchInput {
+    width: 100%;
   }
 
+  .file-card {
+    align-items: flex-start;
+
+    padding: 14px;
+
+    gap: 12px;
+  }
+
+  .file-icon {
+    width: 45px;
+    height: 45px;
+
+    flex-basis: 45px;
+
+    font-size: 22px;
+  }
+
+  .password-area {
+    max-width: none;
+
+    flex-direction: column;
+  }
+
+  .password-button {
+    width: 100%;
+  }
+
+  .file-actions {
+    width: 100%;
+  }
+
+  .file-actions button {
+    flex: 1;
+  }
 }
-```
+
+
+/* =========================================================
+   Reduced motion
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+
+    transition: none !important;
+  }
+}
