@@ -1,3 +1,8 @@
+```css
+/* =========================
+   基本
+========================= */
+
 * {
   box-sizing: border-box;
 }
@@ -10,573 +15,1418 @@ body {
   margin: 0;
 
   font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
+    Arial,
+    "Noto Sans JP",
     sans-serif;
 
-  background: #f4f7fb;
-  color: #172033;
+  background: #eef2f5;
+  color: #263238;
+
+  transition:
+    background .2s,
+    color .2s;
 }
 
 button,
 input {
-  font: inherit;
+  font-family: inherit;
 }
 
 button {
   cursor: pointer;
 }
 
-.site-header {
-  background: white;
-  border-bottom: 1px solid #e4e9f1;
+
+/* =========================
+   ヘッダー
+========================= */
+
+header {
+  position: sticky;
+
+  top: 0;
+
+  z-index: 1000;
+
+  background:
+    linear-gradient(
+      #63b5df,
+      #4298c5
+    );
+
+  border-bottom:
+    2px solid #28769f;
+
+  box-shadow:
+    0 2px 8px
+    rgba(0,0,0,.18);
 }
 
 .header-inner {
   max-width: 1000px;
+
   margin: auto;
-  padding: 24px 20px;
+
+  padding:
+    10px 14px;
 
   display: flex;
+
   align-items: center;
-  justify-content: space-between;
-  gap: 20px;
+
+  justify-content:
+    space-between;
 }
 
-.header-inner h1 {
-  margin: 0 0 5px;
-  font-size: 28px;
+.logo {
+  color: white;
+
+  font-size: 21px;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+  user-select: none;
 }
 
-.header-inner p {
-  margin: 0;
-  color: #6d7789;
+.header-actions {
+  display: flex;
+
+  gap: 6px;
 }
 
-.container {
-  width: min(1000px, calc(100% - 30px));
-  margin: 30px auto 70px;
-}
+.header-button {
+  width: 38px;
+  height: 36px;
 
-.card {
+  border:
+    1px solid #286b8e;
+
+  border-radius: 6px;
+
   background: white;
-  border: 1px solid #e4e9f1;
-  border-radius: 18px;
-  padding: 24px;
-  margin-bottom: 20px;
+
+  font-size: 17px;
+
+  transition:
+    background .15s,
+    transform .1s;
+}
+
+.header-button:hover {
+  background: #eef8fd;
+}
+
+.header-button:active {
+  transform: translateY(1px);
+}
+
+
+/* =========================
+   メイン
+========================= */
+
+main {
+  width: 100%;
+
+  max-width: 1000px;
+
+  margin: auto;
+
+  padding:
+    22px 14px 60px;
+}
+
+
+/* =========================
+   説明
+========================= */
+
+.intro {
+  margin-bottom: 18px;
+}
+
+.intro h1 {
+  margin:
+    0 0 7px;
+
+  font-size: 26px;
+}
+
+.intro > p {
+  margin:
+    0 0 15px;
+
+  color: #607078;
+}
+
+.notice {
+  padding: 14px 16px;
+
+  background: #fff;
+
+  border:
+    1px solid #c8d4da;
+
+  border-left:
+    5px solid #4298c5;
+
+  border-radius: 7px;
 
   box-shadow:
-    0 8px 30px rgba(20, 35, 60, 0.05);
+    0 1px 4px
+    rgba(0,0,0,.05);
 }
 
-.info-box {
-  display: flex;
-  gap: 15px;
-
-  padding: 18px 20px;
-  margin-bottom: 20px;
-
-  border-radius: 16px;
-
-  background: #eef6ff;
-  border: 1px solid #d7eaff;
-}
-
-.info-icon {
-  font-size: 24px;
-}
-
-.info-box strong {
+.notice strong {
   display: block;
-  margin-bottom: 5px;
+
+  margin-bottom: 7px;
 }
 
-.info-box p {
-  margin: 0;
-  color: #526176;
+.notice p {
+  margin:
+    5px 0;
+
+  font-size: 14px;
+
   line-height: 1.6;
+
+  color: #56666e;
 }
 
-.section-title h2,
-.files-header h2 {
-  margin: 0 0 5px;
+
+/* =========================
+   アップロードカード
+========================= */
+
+.upload-card {
+  background: white;
+
+  border:
+    1px solid #c9d4da;
+
+  border-radius: 9px;
+
+  padding: 20px;
+
+  box-shadow:
+    0 2px 8px
+    rgba(0,0,0,.07);
+
+  margin-bottom: 20px;
 }
 
-.section-title p,
-.files-header p {
+.section-title {
+  display: flex;
+
+  align-items: center;
+
+  justify-content:
+    space-between;
+
+  gap: 10px;
+
+  margin-bottom: 15px;
+}
+
+.section-title h2 {
   margin: 0;
-  color: #748096;
+
+  font-size: 20px;
 }
+
+.limit {
+  padding:
+    4px 8px;
+
+  border-radius: 5px;
+
+  background: #edf6fb;
+
+  color: #31799f;
+
+  font-size: 12px;
+
+  white-space: nowrap;
+}
+
+
+/* =========================
+   ドロップゾーン
+========================= */
 
 .drop-zone {
-  margin-top: 22px;
+  position: relative;
 
-  min-height: 210px;
+  min-height: 165px;
 
-  border: 2px dashed #c8d3e2;
-  border-radius: 16px;
+  border:
+    2px dashed #9fb5c0;
+
+  border-radius: 8px;
+
+  background: #f8fbfc;
 
   display: flex;
+
   flex-direction: column;
+
   align-items: center;
+
   justify-content: center;
 
-  gap: 8px;
+  text-align: center;
 
-  color: #59677b;
-
-  transition: 0.2s;
+  transition:
+    border-color .15s,
+    background .15s;
 }
 
 .drop-zone:hover,
 .drop-zone.dragover {
-  border-color: #3978ff;
-  background: #f4f8ff;
+  border-color: #3d98c5;
+
+  background: #edf8fd;
+}
+
+.drop-zone input {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  opacity: 0;
+
+  cursor: pointer;
 }
 
 .drop-icon {
-  font-size: 45px;
+  font-size: 38px;
+
   margin-bottom: 5px;
 }
 
-.drop-zone strong {
-  color: #26334a;
+.drop-title {
+  font-size: 17px;
+
+  font-weight: bold;
 }
 
+.drop-description {
+  margin-top: 5px;
+
+  color: #73848b;
+
+  font-size: 13px;
+}
+
+
+/* =========================
+   選択ファイル
+========================= */
+
 .selected-file {
-  margin-top: 18px;
+  margin-top: 12px;
 
   display: flex;
+
   align-items: center;
-  gap: 14px;
 
-  padding: 15px;
+  gap: 10px;
 
-  border: 1px solid #dfe6ef;
-  border-radius: 13px;
+  padding: 10px 12px;
+
+  border:
+    1px solid #cbd8de;
+
+  border-radius: 6px;
+
+  background: #f7fafb;
 }
 
 .selected-file-icon {
-  font-size: 32px;
+  font-size: 25px;
 }
 
 .selected-file-info {
   min-width: 0;
+
   flex: 1;
 }
 
-.selected-file-info strong {
-  display: block;
+.selected-file-name {
+  font-weight: bold;
+
   overflow: hidden;
+
   text-overflow: ellipsis;
+
   white-space: nowrap;
 }
 
-.selected-file-info span {
-  color: #778399;
+.selected-file-size {
+  margin-top: 3px;
+
+  color: #73848b;
+
+  font-size: 12px;
+}
+
+.small-button {
+  width: 31px;
+  height: 31px;
+
+  border:
+    1px solid #b9c6cc;
+
+  border-radius: 5px;
+
+  background: white;
+
+  color: #66757c;
+}
+
+
+/* =========================
+   フォーム
+========================= */
+
+.form-group {
+  margin-top: 18px;
+}
+
+.form-group label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  font-weight: bold;
+
   font-size: 14px;
 }
 
-.icon-button {
-  width: 35px;
-  height: 35px;
-
-  border: 0;
-  border-radius: 50%;
-
-  background: #edf1f6;
-  color: #59667a;
-}
-
-.password-area {
-  margin-top: 18px;
-
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
-.password-area label {
-  font-weight: 700;
-}
-
-.password-area input,
-.file-password,
-.search-area input {
+.text-input {
   width: 100%;
 
-  padding: 12px 14px;
+  height: 42px;
 
-  border: 1px solid #d4dce7;
-  border-radius: 10px;
+  padding:
+    0 12px;
+
+  border:
+    1px solid #aebdc4;
+
+  border-radius: 6px;
+
+  background: white;
+
+  color: #263238;
+
+  outline: none;
+
+  font-size: 15px;
+
+  transition:
+    border-color .15s,
+    box-shadow .15s;
+}
+
+.text-input:focus {
+  border-color: #3b94c0;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(59,148,192,.12);
+}
+
+.input-help {
+  margin:
+    6px 0 0;
+
+  color: #77878e;
+
+  font-size: 12px;
+
+  line-height: 1.5;
+}
+
+
+/* =========================
+   ボタン
+========================= */
+
+.primary-button {
+  width: 100%;
+
+  min-height: 44px;
+
+  margin-top: 16px;
+
+  border:
+    1px solid #287ba5;
+
+  border-radius: 6px;
+
+  background:
+    linear-gradient(
+      #55abd4,
+      #388ebc
+    );
+
+  color: white;
+
+  font-weight: bold;
+
+  font-size: 15px;
+
+  box-shadow:
+    0 1px 2px
+    rgba(0,0,0,.12);
+}
+
+.primary-button:hover {
+  background:
+    linear-gradient(
+      #63b6dc,
+      #409bc7
+    );
+}
+
+.primary-button:disabled {
+  opacity: .55;
+
+  cursor: not-allowed;
+}
+
+.secondary-button {
+  min-height: 42px;
+
+  padding:
+    0 16px;
+
+  border:
+    1px solid #aebdc4;
+
+  border-radius: 6px;
+
+  background: #fff;
+
+  color: #45555d;
+
+  font-weight: bold;
+}
+
+.secondary-button:hover {
+  background: #f2f5f6;
+}
+
+.full-button {
+  width: 100%;
+
+  margin-top: 9px;
+}
+
+.danger-button {
+  min-height: 42px;
+
+  padding:
+    0 16px;
+
+  border:
+    1px solid #c34b4b;
+
+  border-radius: 6px;
+
+  background: #d9534f;
+
+  color: white;
+
+  font-weight: bold;
+}
+
+.danger-button:hover {
+  background: #c94743;
+}
+
+
+/* =========================
+   プログレス
+========================= */
+
+.progress-area {
+  margin-top: 16px;
+}
+
+.progress-header {
+  display: flex;
+
+  justify-content:
+    space-between;
+
+  margin-bottom: 6px;
+
+  font-size: 13px;
+
+  color: #63737a;
+}
+
+.progress-bar {
+  width: 100%;
+
+  height: 10px;
+
+  overflow: hidden;
+
+  border-radius: 99px;
+
+  background: #dce6ea;
+}
+
+.progress-value {
+  width: 0%;
+
+  height: 100%;
+
+  background: #3c98c5;
+
+  transition:
+    width .12s linear;
+}
+
+
+/* =========================
+   メッセージ
+========================= */
+
+.message {
+  padding:
+    12px 14px;
+
+  margin-bottom: 18px;
+
+  border:
+    1px solid #b9ccd5;
+
+  border-radius: 6px;
+
+  background: #f7fbfd;
+
+  line-height: 1.5;
+
+  font-size: 14px;
+}
+
+.message.success {
+  border-color: #9bc8ad;
+
+  background: #f2faf5;
+
+  color: #28663c;
+}
+
+.message.error {
+  border-color: #e0a6a6;
+
+  background: #fff5f5;
+
+  color: #9a3030;
+}
+
+
+/* =========================
+   削除キー
+========================= */
+
+.delete-key-box {
+  margin-bottom: 20px;
+
+  padding: 17px;
+
+  border:
+    2px solid #e4c46c;
+
+  border-radius: 8px;
+
+  background: #fffbea;
+}
+
+.delete-key-title {
+  font-weight: bold;
+
+  font-size: 17px;
+
+  margin-bottom: 8px;
+}
+
+.delete-key-box p {
+  margin:
+    6px 0 12px;
+
+  line-height: 1.6;
+
+  font-size: 13px;
+}
+
+.delete-key-row {
+  display: flex;
+
+  gap: 7px;
+
+  align-items: stretch;
+}
+
+.delete-key-row code {
+  min-width: 0;
+
+  flex: 1;
+
+  display: flex;
+
+  align-items: center;
+
+  padding:
+    9px 11px;
+
+  overflow-x: auto;
+
+  border:
+    1px solid #d2c48e;
+
+  border-radius: 5px;
+
+  background: white;
+
+  color: #564800;
+
+  font-size: 13px;
+
+  word-break: break-all;
+}
+
+.copy-button {
+  flex-shrink: 0;
+
+  padding:
+    0 13px;
+
+  border:
+    1px solid #a89b63;
+
+  border-radius: 5px;
+
+  background: white;
+
+  color: #51490f;
+
+  font-weight: bold;
+}
+
+.copy-button:hover {
+  background: #f7f1d6;
+}
+
+.delete-key-warning {
+  margin-top: 10px;
+
+  color: #765f12;
+
+  font-size: 12px;
+}
+
+
+/* =========================
+   ファイル一覧
+========================= */
+
+.files-section {
+  margin-top: 22px;
+}
+
+.files-header {
+  display: flex;
+
+  align-items: center;
+
+  justify-content:
+    space-between;
+
+  gap: 10px;
+
+  margin-bottom: 12px;
+}
+
+.files-header h2 {
+  display: inline;
+
+  margin: 0;
+
+  font-size: 20px;
+}
+
+.file-count {
+  margin-left: 8px;
+
+  color: #718189;
+
+  font-size: 13px;
+}
+
+.reload-button {
+  min-height: 36px;
+
+  padding:
+    0 11px;
+
+  border:
+    1px solid #aab9c0;
+
+  border-radius: 5px;
+
+  background: white;
+
+  color: #46575f;
+
+  font-weight: bold;
+}
+
+.reload-button:hover {
+  background: #f1f5f6;
+}
+
+
+/* =========================
+   検索
+========================= */
+
+.search-box {
+  position: relative;
+
+  display: flex;
+
+  align-items: center;
+
+  margin-bottom: 12px;
+}
+
+.search-icon {
+  position: absolute;
+
+  left: 12px;
+
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+
+  height: 40px;
+
+  padding:
+    0 40px 0 37px;
+
+  border:
+    1px solid #b6c4ca;
+
+  border-radius: 6px;
 
   outline: none;
 
   background: white;
 
-  transition: 0.2s;
+  font-size: 14px;
 }
 
-.password-area input:focus,
-.file-password:focus,
-.search-area input:focus {
-  border-color: #3978ff;
-  box-shadow: 0 0 0 3px rgba(57, 120, 255, 0.1);
+.search-input:focus {
+  border-color: #3d98c5;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(61,152,197,.1);
 }
 
-.password-area small {
-  color: #788499;
-}
+.search-clear {
+  position: absolute;
 
-.primary-button,
-.secondary-button,
-.auth-button,
-.download-button,
-.copy-button,
-.delete-button {
+  right: 6px;
+
+  width: 30px;
+  height: 30px;
+
   border: 0;
-  border-radius: 10px;
 
-  padding: 11px 15px;
+  border-radius: 4px;
 
-  font-weight: 700;
+  background: transparent;
 
-  transition: 0.15s;
+  color: #6d7c83;
+
+  font-size: 15px;
 }
 
-.primary-button {
-  background: #3978ff;
-  color: white;
-}
 
-.primary-button:hover {
-  background: #2868ef;
-}
-
-.primary-button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.secondary-button {
-  background: #edf2f8;
-  color: #334157;
-}
-
-.secondary-button:hover {
-  background: #e2e8f0;
-}
-
-.full-button {
-  width: 100%;
-  margin-top: 20px;
-}
-
-.progress-area {
-  margin-top: 20px;
-}
-
-.progress-header {
-  display: flex;
-  justify-content: space-between;
-
-  margin-bottom: 7px;
-
-  font-size: 14px;
-}
-
-.progress-track {
-  height: 9px;
-
-  overflow: hidden;
-
-  background: #e8edf4;
-  border-radius: 99px;
-}
-
-.progress-bar {
-  width: 0%;
-  height: 100%;
-
-  background: #3978ff;
-
-  transition: width 0.25s;
-}
-
-.message {
-  margin-top: 15px;
-
-  padding: 12px 14px;
-
-  border-radius: 10px;
-
-  line-height: 1.5;
-}
-
-.message.success {
-  background: #eaf8ef;
-  color: #24703d;
-}
-
-.message.error {
-  background: #fff0f0;
-  color: #a52d2d;
-}
-
-.files-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  gap: 20px;
-}
-
-.file-count {
-  padding: 8px 12px;
-
-  border-radius: 99px;
-
-  background: #eef3f9;
-
-  color: #58677c;
-
-  font-size: 14px;
-}
-
-.search-area {
-  margin-top: 20px;
-}
+/* =========================
+   ファイルカード
+========================= */
 
 .file-list {
-  margin-top: 18px;
-
   display: flex;
+
   flex-direction: column;
-  gap: 12px;
+
+  gap: 10px;
 }
 
 .file-card {
-  border: 1px solid #e1e7ef;
-  border-radius: 15px;
+  background: white;
 
-  padding: 17px;
+  border:
+    1px solid #c8d3d8;
 
-  transition: 0.15s;
+  border-radius: 8px;
+
+  padding: 15px;
+
+  box-shadow:
+    0 1px 5px
+    rgba(0,0,0,.05);
 }
 
-.file-card:hover {
-  border-color: #c9d5e5;
-  box-shadow: 0 6px 18px rgba(20, 35, 60, 0.04);
-}
-
-.file-main {
+.file-top {
   display: flex;
-  align-items: center;
 
-  gap: 14px;
+  align-items: flex-start;
+
+  gap: 11px;
 }
 
 .file-icon {
-  width: 48px;
-  height: 48px;
-
-  display: grid;
-  place-items: center;
-
-  border-radius: 12px;
-
-  background: #eef4ff;
-
-  font-size: 25px;
+  width: 42px;
+  height: 42px;
 
   flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 7px;
+
+  background: #edf6fb;
+
+  font-size: 22px;
 }
 
 .file-info {
   min-width: 0;
+
   flex: 1;
-}
-
-.file-name-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  min-width: 0;
 }
 
 .file-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+  font-size: 16px;
 
-.lock-badge {
-  flex-shrink: 0;
+  font-weight: bold;
 
-  padding: 4px 8px;
+  word-break: break-word;
 
-  border-radius: 99px;
-
-  background: #fff5dc;
-
-  color: #906d1e;
-
-  font-size: 11px;
-  font-weight: 700;
+  line-height: 1.4;
 }
 
 .file-meta {
+  margin-top: 4px;
+
+  color: #718087;
+
+  font-size: 12px;
+
+  line-height: 1.5;
+}
+
+.password-area {
   display: flex;
+
   gap: 7px;
 
-  margin-top: 5px;
-
-  color: #788499;
-
-  font-size: 13px;
+  margin-top: 13px;
 }
 
-.file-access {
-  margin-top: 14px;
-}
-
-.file-password-row {
-  display: flex;
-  gap: 8px;
-}
-
-.file-password {
+.password-area .text-input {
   flex: 1;
+
+  min-width: 0;
+
+  height: 39px;
 }
 
 .auth-button {
-  background: #e9f0ff;
-  color: #2d64d8;
+  flex-shrink: 0;
 
-  white-space: nowrap;
+  padding:
+    0 13px;
+
+  border:
+    1px solid #3b89ae;
+
+  border-radius: 5px;
+
+  background: #eaf6fc;
+
+  color: #2d7296;
+
+  font-weight: bold;
 }
 
 .auth-button:hover {
-  background: #dce8ff;
+  background: #dceff8;
 }
 
 .auth-message {
-  min-height: 20px;
+  min-height: 18px;
 
-  margin-top: 7px;
+  margin-top: 6px;
+
+  font-size: 12px;
+}
+
+.auth-message.error {
+  color: #c23d3d;
+}
+
+.auth-message.success {
+  color: #27814b;
+}
+
+
+/* =========================
+   アクション
+========================= */
+
+.file-actions {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 7px;
+
+  margin-top: 10px;
+
+  padding-top: 10px;
+
+  border-top:
+    1px solid #e4eaed;
+}
+
+.action-button {
+  min-height: 37px;
+
+  padding:
+    0 11px;
+
+  border:
+    1px solid #aebdc4;
+
+  border-radius: 5px;
+
+  background: white;
+
+  color: #44545b;
+
+  font-weight: bold;
 
   font-size: 13px;
 }
 
-.auth-message.error {
-  color: #b22e2e;
+.action-button:hover {
+  background: #f2f5f6;
 }
 
-.auth-message.success {
-  color: #237542;
+.action-button.delete {
+  border-color: #d19b9b;
+
+  color: #ad3d3d;
 }
 
-.file-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-
-  margin-top: 10px;
+.action-button.delete:hover {
+  background: #fff2f2;
 }
 
-.download-button {
-  background: #3978ff;
-  color: white;
-}
 
-.download-button:hover {
-  background: #2868ef;
-}
+/* =========================
+   Empty / Loading
+========================= */
 
-.copy-button {
-  background: #edf2f8;
-  color: #3b485c;
-}
+.loading {
+  padding: 35px 10px;
 
-.copy-button:hover {
-  background: #e1e7ef;
-}
-
-.delete-button {
-  background: #fff0f0;
-  color: #b52e2e;
-}
-
-.delete-button:hover {
-  background: #ffe1e1;
-}
-
-.state {
   text-align: center;
 
-  padding: 45px 15px;
+  color: #728189;
+}
 
-  color: #748096;
+.empty-state {
+  padding:
+    45px 15px;
+
+  text-align: center;
+
+  background: white;
+
+  border:
+    1px solid #cbd6db;
+
+  border-radius: 8px;
 }
 
 .empty-icon {
-  font-size: 45px;
-  margin-bottom: 8px;
+  font-size: 40px;
 }
 
-.empty-icon + strong {
-  display: block;
-  color: #445168;
+.empty-state h3 {
+  margin:
+    10px 0 5px;
 }
 
-.empty-icon + strong + span {
-  display: block;
-  margin-top: 5px;
+.empty-state p {
+  margin: 0;
+
+  color: #728189;
+
+  font-size: 13px;
 }
+
+
+/* =========================
+   モーダル
+========================= */
+
+.modal {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 2000;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 15px;
+}
+
+.modal-backdrop {
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    rgba(0,0,0,.45);
+}
+
+.modal-box {
+  position: relative;
+
+  z-index: 1;
+
+  width: 100%;
+
+  max-width: 450px;
+
+  padding: 24px;
+
+  border-radius: 9px;
+
+  background: white;
+
+  box-shadow:
+    0 10px 35px
+    rgba(0,0,0,.3);
+}
+
+.modal-close {
+  position: absolute;
+
+  right: 10px;
+  top: 10px;
+
+  width: 32px;
+  height: 32px;
+
+  border: 0;
+
+  border-radius: 5px;
+
+  background: transparent;
+
+  color: #6d777c;
+
+  font-size: 17px;
+}
+
+.modal-icon {
+  text-align: center;
+
+  font-size: 38px;
+
+  margin-bottom: 6px;
+}
+
+.modal-box h2 {
+  margin:
+    0 0 10px;
+
+  text-align: center;
+}
+
+.modal-box > p {
+  margin:
+    0 0 15px;
+
+  color: #64747b;
+
+  font-size: 13px;
+
+  line-height: 1.6;
+
+  text-align: center;
+}
+
+.modal-buttons {
+  display: flex;
+
+  gap: 8px;
+
+  margin-top: 14px;
+}
+
+.modal-buttons button {
+  flex: 1;
+}
+
+.modal-error {
+  margin-top: 8px;
+
+  padding: 8px 10px;
+
+  border-radius: 5px;
+
+  background: #fff0f0;
+
+  color: #b33333;
+
+  font-size: 12px;
+}
+
+.large-key {
+  padding: 14px;
+
+  margin:
+    15px 0;
+
+  border:
+    1px solid #d5c47d;
+
+  border-radius: 6px;
+
+  background: #fffbea;
+
+  overflow-x: auto;
+
+  text-align: center;
+}
+
+.large-key code {
+  color: #554900;
+
+  font-size: 14px;
+
+  word-break: break-all;
+}
+
+
+/* =========================
+   Hidden
+========================= */
 
 .hidden {
   display: none !important;
 }
 
-@media (max-width: 650px) {
+
+/* =========================
+   ダークモード
+========================= */
+
+body.dark-mode {
+  background: #171b1e;
+
+  color: #e7ecef;
+}
+
+body.dark-mode .intro > p,
+body.dark-mode .file-meta,
+body.dark-mode .input-help,
+body.dark-mode .notice p {
+  color: #aebbc1;
+}
+
+body.dark-mode .upload-card,
+body.dark-mode .file-card,
+body.dark-mode .empty-state,
+body.dark-mode .notice,
+body.dark-mode .modal-box {
+  background: #252b2f;
+
+  border-color: #4b555b;
+}
+
+body.dark-mode .drop-zone {
+  background: #1d2326;
+
+  border-color: #58666d;
+}
+
+body.dark-mode .drop-zone:hover,
+body.dark-mode .drop-zone.dragover {
+  background: #202d33;
+
+  border-color: #4a9ac2;
+}
+
+body.dark-mode .selected-file {
+  background: #1e2427;
+
+  border-color: #48545a;
+}
+
+body.dark-mode .text-input,
+body.dark-mode .search-input,
+body.dark-mode .header-button,
+body.dark-mode .reload-button,
+body.dark-mode .action-button,
+body.dark-mode .secondary-button,
+body.dark-mode .small-button,
+body.dark-mode .copy-button {
+  background: #1c2124;
+
+  color: #e6ecef;
+
+  border-color: #566168;
+}
+
+body.dark-mode .text-input:focus,
+body.dark-mode .search-input:focus {
+  border-color: #4a9ac2;
+}
+
+body.dark-mode .file-actions {
+  border-color: #40494e;
+}
+
+body.dark-mode .notice {
+  border-left-color: #4b9cc3;
+}
+
+body.dark-mode .limit {
+  background: #1e313b;
+
+  color: #91c8e2;
+}
+
+body.dark-mode .delete-key-box {
+  background: #302d1c;
+
+  border-color: #74652b;
+}
+
+body.dark-mode .delete-key-box code,
+body.dark-mode .large-key {
+  background: #242318;
+
+  border-color: #665d2e;
+
+  color: #eee09c;
+}
+
+body.dark-mode .delete-key-warning {
+  color: #d5c77c;
+}
+
+body.dark-mode .modal-backdrop {
+  background: rgba(0,0,0,.65);
+}
+
+
+/* =========================
+   スマホ
+========================= */
+
+@media (max-width: 600px) {
+
+  main {
+    padding:
+      16px 9px 45px;
+  }
 
   .header-inner {
-    align-items: flex-start;
+    padding:
+      8px 9px;
   }
 
-  .header-inner h1 {
-    font-size: 24px;
+  .intro h1 {
+    font-size: 23px;
   }
 
-  .card {
-    padding: 18px;
+  .upload-card {
+    padding: 15px;
   }
 
-  .files-header {
-    align-items: flex-start;
+  .section-title h2,
+  .files-header h2 {
+    font-size: 18px;
   }
 
-  .file-password-row {
+  .drop-zone {
+    min-height: 145px;
+  }
+
+  .password-area {
     flex-direction: column;
   }
 
   .auth-button {
-    width: 100%;
+    min-height: 39px;
   }
 
   .file-actions {
-    flex-direction: column;
+    display: grid;
+
+    grid-template-columns:
+      repeat(2, 1fr);
   }
 
-  .file-actions button {
+  .action-button {
     width: 100%;
   }
 
-  .info-box {
-    padding: 15px;
+  .delete-key-row {
+    flex-direction: column;
+  }
+
+  .copy-button {
+    min-height: 39px;
+  }
+
+  .modal-box {
+    padding: 20px 16px;
   }
 
 }
+```
