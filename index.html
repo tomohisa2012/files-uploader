@@ -2,180 +2,79 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <meta
-    name="description"
-    content="FileBox - ファイルを匿名でアップロードして共有できるサービス"
-  >
-
-  <title>FileBox - ファイル共有</title>
+  <title>FileBox</title>
 
   <link rel="stylesheet" href="style.css">
 
-  <script
-    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-    defer
-  ></script>
-
-  <script src="script.js" defer></script>
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
 
-  <!-- =========================
-       背景
-  ========================== -->
-
-  <div class="background-decoration bg-1"></div>
-  <div class="background-decoration bg-2"></div>
-
-
-  <!-- =========================
-       ヘッダー
-  ========================== -->
-
-  <header class="site-header">
-
+  <header class="header">
     <div class="header-inner">
-
-      <a href="#" class="logo">
-        <span class="logo-icon">▣</span>
-        <span class="logo-text">FileBox</span>
-      </a>
-
-      <div class="header-status">
-        <span class="status-dot"></span>
-        <span>オンライン</span>
+      <div class="logo">
+        <div class="logo-icon">▣</div>
+        <div>
+          <h1>FileBox</h1>
+          <p>かんたんファイル共有</p>
+        </div>
       </div>
-
     </div>
-
   </header>
 
 
-  <!-- =========================
-       メイン
-  ========================== -->
-
-  <main class="main-container">
-
-
-    <!-- =========================
-         ヒーロー
-    ========================== -->
+  <main class="container">
 
     <section class="hero">
-
-      <div class="hero-badge">
-        <span>⚡</span>
-        かんたんファイル共有
-      </div>
-
-      <h1>
-        ファイルを
-        <span>かんたんに共有</span>
-      </h1>
-
+      <h2>ファイルをかんたんに共有</h2>
       <p>
         ファイルをアップロードして、別の端末からダウンロードできます。
-        <br>
-        パスワードでファイルを保護することもできます。
       </p>
-
     </section>
 
 
-    <!-- =========================
-         注意
-    ========================== -->
-
-    <section class="notice-card">
-
-      <div class="notice-icon">🔐</div>
-
-      <div class="notice-content">
-
-        <strong>パスワードについて</strong>
-
+    <section class="notice">
+      <div class="notice-icon">i</div>
+      <div>
+        <strong>FileBoxの使い方</strong>
         <p>
-          アップロード時に設定したパスワードを入力すると、
-          ダウンロードとURL取得ができるようになります。
+          ① ファイルを選択 → ② パスワードを設定 → ③ アップロード
+          の順番で使用できます。
         </p>
-
       </div>
-
     </section>
 
 
-    <!-- =========================
-         アップロードカード
-    ========================== -->
-
+    <!-- アップロード -->
     <section class="card upload-card">
 
-      <div class="card-header">
-
+      <div class="section-title">
+        <div class="section-icon">↑</div>
         <div>
-
-          <div class="section-label">
-            UPLOAD
-          </div>
-
-          <h2>
-            ファイルをアップロード
-          </h2>
-
-          <p>
-            ファイルを選択してアップロードしてください。
-          </p>
-
+          <h2>ファイルをアップロード</h2>
+          <p>共有したいファイルを選択してください</p>
         </div>
-
-        <div class="card-header-icon">
-          ↑
-        </div>
-
       </div>
 
 
-      <!-- =========================
-           ファイル選択
-      ========================== -->
+      <div id="dropZone" class="drop-zone">
 
-      <div
-        class="drop-zone"
-        id="dropZone"
-      >
+        <div id="dropIcon" class="drop-icon">↑</div>
 
-        <div
-          class="drop-icon"
-          id="dropIcon"
-        >
-          ↑
-        </div>
-
-        <h3 id="dropTitle">
-          ファイルを選択
-        </h3>
+        <h3 id="dropTitle">ファイルを選択</h3>
 
         <p id="dropDescription">
-          下のボタンからファイルを選択してください
+          ファイルを選ぶには下のボタンを押してください
         </p>
 
 
-        <button
-          type="button"
-          id="fileSelectButton"
-          class="file-select-button"
-        >
-          <span>📁</span>
-          ファイルを選ぶ
-        </button>
+        <label for="fileInput" class="file-select-button">
+          📁 ファイルを選ぶ
+        </label>
 
         <input
           type="file"
@@ -185,18 +84,13 @@
 
 
         <!-- 選択済みファイル -->
-
-        <div
-          id="selectedFile"
-          class="selected-file hidden"
-        >
+        <div id="selectedFile" class="selected-file hidden">
 
           <div class="selected-file-icon">
             ✓
           </div>
 
           <div class="selected-file-info">
-
             <span
               id="fileName"
               class="selected-file-name"
@@ -210,7 +104,6 @@
             >
               0 B
             </span>
-
           </div>
 
           <button
@@ -227,33 +120,29 @@
       </div>
 
 
-      <!-- =========================
-           パスワード
-      ========================== -->
+      <!-- パスワード -->
+      <div class="password-section">
 
-      <div class="form-group">
-
-        <label
-          for="uploadPassword"
-          class="form-label"
-        >
-          <span>🔒</span>
-          パスワード
+        <label for="uploadPassword">
+          🔒 ダウンロードパスワード
         </label>
+
+        <p class="help-text">
+          ダウンロードするときに必要になります。
+        </p>
 
         <div class="password-input-wrap">
 
           <input
             type="password"
             id="uploadPassword"
-            class="text-input"
-            placeholder="ファイルを保護するパスワード"
+            placeholder="パスワードを入力"
             autocomplete="new-password"
           >
 
           <button
             type="button"
-            id="toggleUploadPassword"
+            id="togglePassword"
             class="password-toggle"
           >
             表示
@@ -261,24 +150,28 @@
 
         </div>
 
-        <p class="form-help">
-          このパスワードはファイルをダウンロードするときに必要です。
-        </p>
-
       </div>
 
 
-      <!-- =========================
-           アップロード進捗
-      ========================== -->
+      <!-- アップロードボタン -->
+      <button
+        type="button"
+        id="uploadButton"
+        class="upload-button"
+        disabled
+      >
+        <span>↑</span>
+        アップロード
+      </button>
 
+
+      <!-- プログレス -->
       <div
         id="progressArea"
         class="progress-area hidden"
       >
 
         <div class="progress-top">
-
           <span id="progressText">
             アップロード中...
           </span>
@@ -286,76 +179,48 @@
           <span id="progressPercent">
             0%
           </span>
-
         </div>
 
-        <div class="progress-track">
-
+        <div class="progress-bar">
           <div
             id="progressValue"
             class="progress-value"
-            style="width: 0%"
           ></div>
-
         </div>
 
       </div>
 
 
-      <!-- =========================
-           アップロードボタン
-      ========================== -->
-
-      <button
-        type="button"
-        id="uploadButton"
-        class="primary-button"
-        disabled
+      <!-- 削除キー -->
+      <div
+        id="deleteKeyBox"
+        class="delete-key-box hidden"
       >
 
-        <span class="button-icon">
-          ↑
-        </span>
-
-        <span>
-          アップロードする
-        </span>
-
-      </button>
-
-
-      <!-- =========================
-           アップロード結果
-      ========================== -->
-
-      <div
-        id="uploadResult"
-        class="upload-result hidden"
-      ></div>
-
-
-      <!-- =========================
-           削除キー
-      ========================== -->
-
-      <div class="delete-key-box">
-
         <div class="delete-key-icon">
-          ⚠
+          🔑
         </div>
 
         <div>
-
-          <strong>
-            削除キーについて
-          </strong>
+          <strong>削除キーを保存してください</strong>
 
           <p>
-            匿名アップロードのため、アップロードした本人を
-            自動で判別できません。
-            ファイルを削除するときは専用の削除キーを使用します。
+            このファイルを後から削除するときに必要です。
+            削除キーはここでしか表示されません。
           </p>
 
+          <div class="delete-key-row">
+
+            <code id="deleteKeyText"></code>
+
+            <button
+              type="button"
+              id="copyDeleteKeyButton"
+            >
+              コピー
+            </button>
+
+          </div>
         </div>
 
       </div>
@@ -363,112 +228,74 @@
     </section>
 
 
-    <!-- =========================
-         ファイル一覧
-    ========================== -->
-
+    <!-- ファイル一覧 -->
     <section class="card files-card">
 
-      <div class="card-header">
+      <div class="files-header">
 
-        <div>
+        <div class="section-title">
+          <div class="section-icon">☷</div>
 
-          <div class="section-label">
-            FILES
+          <div>
+            <h2>ファイル一覧</h2>
+
+            <p>
+              アップロードされたファイル
+            </p>
           </div>
-
-          <h2>
-            アップロード済みファイル
-          </h2>
-
-          <p>
-            共有されているファイルを確認できます。
-          </p>
-
         </div>
 
         <button
           type="button"
           id="reloadButton"
           class="reload-button"
-          title="再読み込み"
         >
-          ↻
+          ↻ 更新
         </button>
 
       </div>
 
 
-      <!-- =========================
-           検索
-      ========================== -->
-
-      <div class="file-toolbar">
+      <!-- 検索 -->
+      <div class="search-area">
 
         <div class="search-box">
 
-          <span class="search-icon">
-            🔎
-          </span>
+          <span>🔎</span>
 
           <input
             type="text"
             id="searchInput"
-            placeholder="ファイル名を検索..."
+            placeholder="ファイルを検索..."
           >
 
           <button
             type="button"
             id="searchClear"
-            class="search-clear hidden"
           >
             ×
           </button>
 
         </div>
 
-        <div
-          id="fileCount"
-          class="file-count"
-        >
-          0 件
-        </div>
-
       </div>
 
 
-      <!-- =========================
-           一覧
-      ========================== -->
+      <div
+        id="fileCount"
+        class="file-count"
+      >
+        0件
+      </div>
+
 
       <div
         id="fileList"
         class="file-list"
-      >
-
-        <div class="empty-state">
-
-          <div class="empty-icon">
-            ◌
-          </div>
-
-          <h3>
-            読み込み中...
-          </h3>
-
-          <p>
-            ファイル一覧を取得しています。
-          </p>
-
-        </div>
-
-      </div>
+      ></div>
 
 
-      <!-- =========================
-           ページネーション
-      ========================== -->
-
+      <!-- ページネーション -->
       <div
         id="pagination"
         class="pagination"
@@ -476,92 +303,10 @@
 
     </section>
 
-
-    <!-- =========================
-         説明
-    ========================== -->
-
-    <section class="how-to-card">
-
-      <h2>
-        💡 FileBoxの使い方
-      </h2>
-
-      <div class="steps">
-
-        <div class="step">
-
-          <div class="step-number">
-            1
-          </div>
-
-          <div>
-
-            <strong>
-              ファイルを選ぶ
-            </strong>
-
-            <p>
-              「ファイルを選ぶ」を押して共有したいファイルを選択します。
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <div class="step">
-
-          <div class="step-number">
-            2
-          </div>
-
-          <div>
-
-            <strong>
-              パスワードを設定
-            </strong>
-
-            <p>
-              ダウンロード時に必要になるパスワードを設定します。
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <div class="step">
-
-          <div class="step-number">
-            3
-          </div>
-
-          <div>
-
-            <strong>
-              共有する
-            </strong>
-
-            <p>
-              相手にFileBoxのページを教えて、ファイルのパスワードを伝えます。
-            </p>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
   </main>
 
 
-  <!-- =========================
-       パスワードモーダル
-  ========================== -->
-
+  <!-- パスワード確認モーダル -->
   <div
     id="passwordModal"
     class="modal hidden"
@@ -574,37 +319,24 @@
       <button
         type="button"
         class="modal-close"
-        data-close="passwordModal"
+        data-close-modal="passwordModal"
       >
         ×
       </button>
 
       <div class="modal-icon">
-        🔐
+        🔒
       </div>
 
-      <h2>
-        パスワードを入力
-      </h2>
+      <h2>パスワードが必要です</h2>
 
-      <p
-        id="passwordModalDescription"
-        class="modal-description"
-      >
-        このファイルはパスワードで保護されています。
+      <p id="passwordModalFileName">
+        このファイルを操作するにはパスワードを入力してください。
       </p>
-
-      <div class="modal-file-name">
-        <span>📄</span>
-        <span id="passwordModalFileName">
-          ファイル
-        </span>
-      </div>
 
       <input
         type="password"
-        id="filePasswordInput"
-        class="text-input modal-input"
+        id="accessPassword"
         placeholder="パスワード"
         autocomplete="off"
       >
@@ -616,10 +348,10 @@
 
       <button
         type="button"
-        id="verifyPasswordButton"
-        class="primary-button"
+        id="passwordSubmit"
+        class="modal-primary"
       >
-        🔓 ロックを解除
+        確認する
       </button>
 
     </div>
@@ -627,10 +359,7 @@
   </div>
 
 
-  <!-- =========================
-       削除モーダル
-  ========================== -->
-
+  <!-- 削除モーダル -->
   <div
     id="deleteModal"
     class="modal hidden"
@@ -643,35 +372,26 @@
       <button
         type="button"
         class="modal-close"
-        data-close="deleteModal"
+        data-close-modal="deleteModal"
       >
         ×
       </button>
 
-      <div class="modal-icon danger">
-        🗑️
+      <div class="modal-icon delete-icon">
+        🗑
       </div>
 
-      <h2>
-        ファイルを削除
-      </h2>
+      <h2>ファイルを削除</h2>
 
-      <p class="modal-description">
-        削除キーを入力してください。
-        ファイルを削除すると元に戻せません。
+      <p id="deleteModalFileName"></p>
+
+      <p class="modal-help">
+        アップロード時に発行された削除キーを入力してください。
       </p>
 
-      <div class="modal-file-name">
-        <span>📄</span>
-        <span id="deleteModalFileName">
-          ファイル
-        </span>
-      </div>
-
       <input
-        type="password"
+        type="text"
         id="deleteKeyInput"
-        class="text-input modal-input"
         placeholder="削除キー"
         autocomplete="off"
       >
@@ -683,10 +403,10 @@
 
       <button
         type="button"
-        id="confirmDeleteButton"
-        class="danger-button"
+        id="deleteSubmit"
+        class="modal-danger"
       >
-        🗑️ 削除する
+        削除する
       </button>
 
     </div>
@@ -694,10 +414,7 @@
   </div>
 
 
-  <!-- =========================
-       URLモーダル
-  ========================== -->
-
+  <!-- URLモーダル -->
   <div
     id="urlModal"
     class="modal hidden"
@@ -710,7 +427,7 @@
       <button
         type="button"
         class="modal-close"
-        data-close="urlModal"
+        data-close-modal="urlModal"
       >
         ×
       </button>
@@ -719,19 +436,17 @@
         🔗
       </div>
 
-      <h2>
-        ダウンロードURL
-      </h2>
+      <h2>ダウンロードURL</h2>
 
-      <p class="modal-description">
+      <p>
         このURLは一時的なダウンロードURLです。
       </p>
 
-      <div class="url-box">
+      <div class="url-row">
 
         <input
           type="text"
-          id="urlInput"
+          id="urlText"
           readonly
         >
 
@@ -744,35 +459,15 @@
 
       </div>
 
-      <p class="url-expire">
-        URLは一定時間後に無効になります。
-      </p>
-
     </div>
 
   </div>
 
 
-  <!-- =========================
-       通知
-  ========================== -->
-
+  <!-- ローディング -->
   <div
-    id="toast"
-    class="toast hidden"
-  >
-    <span id="toastIcon">✓</span>
-    <span id="toastMessage">完了しました</span>
-  </div>
-
-
-  <!-- =========================
-       ローディング
-  ========================== -->
-
-  <div
-    id="loadingOverlay"
-    class="loading-overlay hidden"
+    id="loadingModal"
+    class="loading-modal hidden"
   >
 
     <div class="loading-box">
@@ -786,6 +481,16 @@
     </div>
 
   </div>
+
+
+  <footer>
+    <p>FileBox</p>
+    <span>かんたん・匿名ファイル共有</span>
+  </footer>
+
+
+  <!-- 最後にJSを読み込む -->
+  <script src="script.js"></script>
 
 </body>
 </html>
