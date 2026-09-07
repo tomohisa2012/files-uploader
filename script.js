@@ -1452,10 +1452,8 @@ async function submitPassword() {
     return;
   }
 
-
   const password =
     accessPassword.value;
-
 
   if (!password) {
 
@@ -1466,35 +1464,22 @@ async function submitPassword() {
     return;
   }
 
-
   passwordSubmit.disabled =
     true;
 
   passwordSubmit.textContent =
     "確認中...";
 
-
   try {
 
-closeModal("passwordModal");
+    /*
+     * verify は使わない。
+     *
+     * download / url のリクエスト自体で
+     * Edge Function側がパスワードを検証する。
+     */
 
-if (currentAction === "download") {
-  await downloadFile(
-    currentFile.id,
-    password
-  );
-} else if (currentAction === "url") {
-  await showFileURL(
-    currentFile.id,
-    password
-  );
-}
-
-
-    closeModal(
-      "passwordModal"
-    );
-
+    closeModal("passwordModal");
 
     if (
       currentAction ===
@@ -1515,8 +1500,8 @@ if (currentAction === "download") {
         currentFile.id,
         password
       );
-    }
 
+    }
 
   } catch (error) {
 
@@ -1524,6 +1509,8 @@ if (currentAction === "download") {
       "Password verification error:",
       error
     );
+
+    openModal("passwordModal");
 
     showPasswordError(
       getErrorMessage(error)
