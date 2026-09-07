@@ -174,7 +174,53 @@
         </div>
 
       </div>
+<!-- URL発行設定 -->
+<div class="url-setting-section">
 
+  <div class="url-setting-title">
+    🔗 ダウンロードURLの発行
+  </div>
+
+  <p class="help-text">
+    URL発行を許可するか選択できます。
+  </p>
+
+  <label class="url-option">
+
+    <input
+      type="radio"
+      name="allowUrl"
+      value="false"
+      checked
+    >
+
+    <span>
+      <strong>URLを発行しない</strong>
+      <small>
+        ファイル一覧からダウンロードする方式です。
+      </small>
+    </span>
+
+  </label>
+
+  <label class="url-option">
+
+    <input
+      type="radio"
+      name="allowUrl"
+      value="true"
+    >
+
+    <span>
+      <strong>URLの発行を許可する</strong>
+      <small>
+        パスワードを入力した人がダウンロードURLを取得できます。
+      </small>
+    </span>
+
+  </label>
+
+</div>
 
       <!-- アップロードボタン -->
       <button
