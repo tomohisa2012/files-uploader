@@ -1476,24 +1476,19 @@ async function submitPassword() {
 
   try {
 
-    const result =
-      await callFileAccess(
-        "verify",
-        currentFile.id,
-        password
-      );
+closeModal("passwordModal");
 
-
-    if (
-      !result ||
-      !result.success
-    ) {
-
-      throw new Error(
-        result?.error ||
-        "パスワードが違います。"
-      );
-    }
+if (currentAction === "download") {
+  await downloadFile(
+    currentFile.id,
+    password
+  );
+} else if (currentAction === "url") {
+  await showFileURL(
+    currentFile.id,
+    password
+  );
+}
 
 
     closeModal(
