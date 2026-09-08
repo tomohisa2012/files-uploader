@@ -143,6 +143,29 @@
   </div>
 
 </div>
+      <!-- ファイル説明 -->
+<div class="description-section">
+
+  <label for="fileDescription">
+    📝 ファイルの説明
+  </label>
+
+  <p class="help-text">
+    ファイルの内容や用途などを入力できます。
+  </p>
+
+  <textarea
+    id="fileDescription"
+    class="description-input"
+    placeholder="例：ゲームの最新版です。Windowsで動作します。"
+    maxlength="1000"
+  ></textarea>
+
+  <div class="description-count">
+    <span id="descriptionCount">0</span>/1000文字
+  </div>
+
+</div>
       <!-- パスワード -->
       <div class="password-section">
 
@@ -215,6 +238,53 @@
       <strong>URLの発行を許可する</strong>
       <small>
         パスワードを入力した人がダウンロードURLを取得できます。
+      </small>
+    </span>
+
+  </label>
+
+</div>
+      <!-- URL発行設定 -->
+<div class="url-setting-section">
+
+  <div class="url-setting-title">
+    🔗 ダウンロードURLの発行
+  </div>
+
+  <p class="help-text">
+    ダウンロードURLを他の人に発行できるようにするか選択します。
+  </p>
+
+  <label class="url-option">
+
+    <input
+      type="radio"
+      name="allowUrl"
+      value="false"
+      checked
+    >
+
+    <span>
+      <strong>URLを発行しない</strong>
+      <small>
+        URL発行ボタンを表示しません。
+      </small>
+    </span>
+
+  </label>
+
+  <label class="url-option">
+
+    <input
+      type="radio"
+      name="allowUrl"
+      value="true"
+    >
+
+    <span>
+      <strong>URLの発行を許可する</strong>
+      <small>
+        パスワード確認後に一時URLを発行できます。
       </small>
     </span>
 
