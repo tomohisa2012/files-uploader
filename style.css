@@ -1596,3 +1596,120 @@ footer p {
     padding: 25px 20px;
   }
 }
+/* =========================
+   ファイル説明
+========================= */
+
+.description-section {
+  margin-top: 22px;
+}
+
+.description-section label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.description-input {
+  width: 100%;
+  min-height: 110px;
+  padding: 12px;
+  resize: vertical;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  outline: none;
+}
+
+.description-input:focus {
+  border-color: #38bdf8;
+}
+
+.description-count {
+  margin-top: 5px;
+  text-align: right;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+
+/* =========================
+   URL設定
+========================= */
+
+.url-setting-section {
+  margin-top: 22px;
+  padding: 16px;
+
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.url-setting-title {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.url-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  margin-top: 12px;
+  padding: 12px;
+
+  background: white;
+  border: 1px solid #dbe3ea;
+  border-radius: 9px;
+
+  cursor: pointer;
+}
+
+.url-option:hover {
+  border-color: #38bdf8;
+  background: #f0f9ff;
+}
+
+.url-option input {
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+}
+
+.url-option span {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.url-option small {
+  color: #64748b;
+}
+
+
+/* =========================
+   一覧の説明
+========================= */
+
+.file-description {
+  margin-top: 9px;
+  padding: 9px 11px;
+
+  background: #f8fafc;
+
+  border-left: 3px solid #38bdf8;
+  border-radius: 4px;
+
+  color: #475569;
+
+  font-size: 13px;
+  line-height: 1.6;
+
+  white-space: pre-wrap;
+  word-break: break-word;
+}
