@@ -19,7 +19,6 @@ const SUPABASE_URL = "https://jlmskpyaftbndqhfqvwq.supabase.co";
 
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_q3H9vNZW28PZVGHebbB72g_brELXdmZ";
 
-
 /* =========================================================
    Supabase初期化
 ========================================================= */
